@@ -193,6 +193,76 @@ public:
     double theta;
 };
 
+class sbpl_xy_theta_v_cell_t
+{
+public:
+	sbpl_xy_theta_v_cell_t()
+	{
+		x = 0;
+		y = 0;
+		theta = 0;
+		v = 0;
+	}
+
+	sbpl_xy_v_theta_cell_t(int x_, int y_, int theta_, int v_)
+	{
+		x = x_;
+		y = y_;
+		theta = theta_;
+		v = v_;
+	}
+
+	bool operator==(const sbpl_xy_theta_v_cell_t cell) const
+	{
+		return x == cell.x && y == cell.y && theta == cell.theta && v == cell.v;
+	}
+
+	bool operator<(const sbpl_xy_theta_v_cell_t cell) const
+	{
+		return x < cell.x || (x == cell.x && (y < cell.y || (y == cell.y && (theta < cell.theta  || (theta == cell.theta && v == cell.v)))));
+	}
+
+	int x;
+	int y;
+	int theta;
+	int v;
+};
+
+class sbpl_xy_theta_v_pt_t
+{
+public:
+	sbpl_xy_theta_v_pt_t()
+	{
+		x = 0;
+		y = 0;
+		theta = 0;
+		v = 0;
+	}
+
+	sbpl_xy_theta_v_pt_t(double x_, double y_, double theta_, double v_)
+	{
+		x = x_;
+		y = y_;
+		theta = theta_;
+		v = v_;
+	}
+
+	bool operator==(const sbpl_xy_theta_v_pt_t p) const
+	{
+		return x == p.x && y == p.y && theta == p.theta && v == p.v;
+	}
+
+	bool operator<(const sbpl_xy_theta_v_pt_t p) const
+	{
+		return x < p.x || (x == p.x && (y < p.y || (y == p.y && (theta < p.theta || (theta == p.theta && v < p.v)))));
+	}
+
+	double x;
+	double y;
+	double theta;
+	double v;
+};
+
 typedef struct BINARYHIDDENVARIABLE
 {
     int h_ID; //ID of the variable
