@@ -204,7 +204,7 @@ public:
 		v = 0;
 	}
 
-	sbpl_xy_v_theta_cell_t(int x_, int y_, int theta_, int v_)
+	sbpl_xy_theta_v_cell_t(int x_, int y_, int theta_, int v_)
 	{
 		x = x_;
 		y = y_;
@@ -329,6 +329,13 @@ double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS);
  * \note maps 0->0, [delta/2, 3/2*delta)->1, [3/2*delta, 5/2*delta)->2,...
  */
 int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS);
+
+/**
+ * \brief converts continuous version of velocity into discrete
+ *
+ * \note maps corresponding vector values
+ */
+int ContV2Disc(double fV, std::vector<double>);
 
 /**
  * \note counterclockwise is positive

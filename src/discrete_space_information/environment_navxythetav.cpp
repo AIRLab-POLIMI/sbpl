@@ -16,6 +16,8 @@
 #include <sbpl/planners/planner.h>
 #include <sbpl/utils/mdp.h>
 #include <sbpl/utils/mdpconfig.h>
+#include <string.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -80,12 +82,323 @@ void EnvironmentNAVXYTHETAV::PrintHashTableHist()
 
 void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 {
-    //read in the configuration of environment and initialize  EnvCfg structure
+	//read in the configuration of environment and initialize  EnvCfg structure
+	char sTemp[1024], sTemp1[1024];
+	int dTemp;
+	int x, y;
+
+	//discretization(cells)
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "discretization(cells):");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format (discretization)\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.EnvWidth_c = atoi(sTemp);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.EnvHeight_c = atoi(sTemp);
+
+	// Scan for optional NumThetaDirs parameter. Check for following obsthresh.
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "NumThetaDirs:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
+	}
+	
+	EnvNAVXYTHETAVCfg.NumThetaDirs = atoi(sTemp);
+
+	//numv: 
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (obsthresh)\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "NumV:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.numV = atoi(sTemp);
+	
+	//velocities: 
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (obsthresh)\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "Velocities:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
+	}
+	
+	/* SUBSTITUTE VECTOR WITH POINTER */
+	for(int i=0;i<EnvNAVXYTHETAVCfg.numV;i++){
+		if (fscanf(fCfg, "%s", sTemp) != 1) {
+			SBPL_ERROR("ERROR: ran out of env file early\n");
+			throw new SBPL_Exception();
+		}
+		
+		EnvNAVXYTHETAVCfg.velocities.push_back(atof(sTemp));
+	}
+	
+	//obsthresh: 
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early (obsthresh)\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "obsthresh:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
+	}
+
+	// obsthresh
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.obsthresh = atoi(sTemp);
+	SBPL_PRINTF("obsthresh = %d\n", EnvNAVXYTHETAVCfg.obsthresh);
+
+	//cost_inscribed_thresh: 
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "cost_inscribed_thresh:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.cost_inscribed_thresh = atoi(sTemp);
+	SBPL_PRINTF("cost_inscribed_thresh = %d\n", EnvNAVXYTHETAVCfg.cost_inscribed_thresh);
+
+	//cost_possibly_circumscribed_thresh: 
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "cost_possibly_circumscribed_thresh:");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
+	SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh);
+
+	//cellsize
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	strcpy(sTemp1, "cellsize(meters):");
+	if (strcmp(sTemp1, sTemp) != 0) {
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.cellsize_m = atof(sTemp);
+
+	//start(meters,rads):
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.StartX_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETAVCfg.cellsize_m);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.StartY_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETAVCfg.cellsize_m);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.StartV = ContV2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.velocities);
+
+	if (EnvNAVXYTHETAVCfg.StartX_c < 0 || EnvNAVXYTHETAVCfg.StartX_c >= EnvNAVXYTHETAVCfg.EnvWidth_c) {
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.StartY_c < 0 || EnvNAVXYTHETAVCfg.StartY_c >= EnvNAVXYTHETAVCfg.EnvHeight_c) {
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.StartTheta < 0 || EnvNAVXYTHETAVCfg.StartTheta >= EnvNAVXYTHETAVCfg.NumThetaDirs) {
+		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.StartV < 0 || EnvNAVXYTHETAVCfg.StartV >= EnvNAVXYTHETAVCfg.numV) {
+		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+		throw new SBPL_Exception();
+	}
+
+	//end(meters,rads):
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.EndX_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETAVCfg.cellsize_m);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.EndY_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETAVCfg.cellsize_m);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	EnvNAVXYTHETAVCfg.StartV = ContV2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.velocities);
+
+	if (EnvNAVXYTHETAVCfg.EndX_c < 0 || EnvNAVXYTHETAVCfg.EndX_c >= EnvNAVXYTHETAVCfg.EnvWidth_c) {
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.EndY_c < 0 || EnvNAVXYTHETAVCfg.EndY_c >= EnvNAVXYTHETAVCfg.EnvHeight_c) {
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.EndTheta < 0 || EnvNAVXYTHETAVCfg.EndTheta >= EnvNAVXYTHETAVCfg.NumThetaDirs) {
+		SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
+		throw new SBPL_Exception();
+	}
+	if (EnvNAVXYTHETAVCfg.EndV < 0 || EnvNAVXYTHETAVCfg.EndV >= EnvNAVXYTHETAVCfg.numV) {
+		SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
+		throw new SBPL_Exception();
+	}
+
+	//allocate the 2D environment
+	EnvNAVXYTHETAVCfg.Grid2D = new unsigned char*[EnvNAVXYTHETAVCfg.EnvWidth_c];
+	for (x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
+		EnvNAVXYTHETAVCfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETAVCfg.EnvHeight_c];
+	}
+
+	//environment:
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
+		throw new SBPL_Exception();
+	}
+	/* NON MI CONVINCE, VEDERE COSA SUCCEDE */
+	for (y = 0; y < EnvNAVXYTHETAVCfg.EnvHeight_c; y++)
+		for (x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
+			if (fscanf(fCfg, "%d", &dTemp) != 1) {
+				SBPL_ERROR("ERROR: incorrect format of config file\n");
+				throw new SBPL_Exception();
+			}
+			EnvNAVXYTHETAVCfg.Grid2D[x][y] = dTemp;
+		}
 }
 
-void EnvironmentNAVXYTHETAV::InitializeEnvConfig()
+void EnvironmentNAVXYTHETAV::InitializeEnvConfig(vector<SBPL_xythetav_mprimitive>* motionprimitiveV)
 {
     //aditional to configuration file initialization of EnvCfg if necessary
+    
+    /*
+    //dXY dirs
+    EnvNAVXYTHETALATCfg.dXY[0][0] = -1;
+    EnvNAVXYTHETALATCfg.dXY[0][1] = -1;
+    EnvNAVXYTHETALATCfg.dXY[1][0] = -1;
+    EnvNAVXYTHETALATCfg.dXY[1][1] = 0;
+    EnvNAVXYTHETALATCfg.dXY[2][0] = -1;
+    EnvNAVXYTHETALATCfg.dXY[2][1] = 1;
+    EnvNAVXYTHETALATCfg.dXY[3][0] = 0;
+    EnvNAVXYTHETALATCfg.dXY[3][1] = -1;
+    EnvNAVXYTHETALATCfg.dXY[4][0] = 0;
+    EnvNAVXYTHETALATCfg.dXY[4][1] = 1;
+    EnvNAVXYTHETALATCfg.dXY[5][0] = 1;
+    EnvNAVXYTHETALATCfg.dXY[5][1] = -1;
+    EnvNAVXYTHETALATCfg.dXY[6][0] = 1;
+    EnvNAVXYTHETALATCfg.dXY[6][1] = 0;
+    EnvNAVXYTHETALATCfg.dXY[7][0] = 1;
+    EnvNAVXYTHETALATCfg.dXY[7][1] = 1;
+	*/
+
+    sbpl_xy_theta_pt_t temppose;
+    temppose.x = 0.0;
+    temppose.y = 0.0;
+    temppose.theta = 0.0;
+    vector<sbpl_2Dcell_t> footprint;
+    get_2d_footprint_cells(EnvNAVXYTHETAVCfg.FootprintPolygon, &footprint, temppose, EnvNAVXYTHETAVCfg.cellsize_m);
+    SBPL_PRINTF("number of cells in footprint of the robot = %d\n", (unsigned int)footprint.size());
+
+    for (vector<sbpl_2Dcell_t>::iterator it = footprint.begin(); it != footprint.end(); ++it) {
+        SBPL_PRINTF("Footprint cell at (%d, %d)\n", it->x, it->y);
+    }
+
+#if DEBUG
+    SBPL_FPRINTF(fDeb, "footprint cells (size=%d):\n", (int)footprint.size());
+    for(int i = 0; i < (int) footprint.size(); i++)
+    {
+        SBPL_FPRINTF(fDeb, "%d %d (cont: %.3f %.3f)\n", footprint.at(i).x, footprint.at(i).y,
+                     DISCXY2CONT(footprint.at(i).x, EnvNAVXYTHETAVCfg.cellsize_m),
+                     DISCXY2CONT(footprint.at(i).y, EnvNAVXYTHETAVCfg.cellsize_m));
+    }
+#endif
+    
+	PrecomputeActionswithCompleteMotionPrimitive(motionprimitiveV);
+}
+
+void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV){
+	
 }
 
 /*
@@ -252,6 +565,7 @@ void EnvironmentNAVXYTHETAV::ComputeHeuristicValues()
 
 bool EnvironmentNAVXYTHETAV::InitializeEnv(const char* sEnvFile)
 {
+	vector<SBPL_xythetav_mprimitive> temp;
     FILE* fCfg = fopen(sEnvFile, "r");
     if (fCfg == NULL) {
         SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
@@ -261,7 +575,7 @@ bool EnvironmentNAVXYTHETAV::InitializeEnv(const char* sEnvFile)
     fclose(fCfg);
 
     //Initialize other parameters of the environment
-    InitializeEnvConfig();
+    InitializeEnvConfig(&temp);
 
     //initialize Environment
     InitializeEnvironment();

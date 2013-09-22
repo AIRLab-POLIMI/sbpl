@@ -61,9 +61,15 @@ typedef struct
 	std::vector<sbpl_xy_theta_v_cell_t> interm3DcellsV;
 } EnvNAVXYTHETAVAction_t;
 
-/*
-* The velocity will be discretized or not?
-*/
+class sbpl_xythetav_groupaction_t{
+private:
+	int start_theta;
+	int start_v;
+	std::vector<EnvNAVXYTHETAVAction_t> actions;
+public:
+	sbpl_xythetav_groupaction_t(){
+	}
+};
 
 typedef struct ENV_NAVXYTHETAV_CONFIG
 {
@@ -82,49 +88,56 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	int EndV;
 	unsigned char ** Grid2D;
 	
-	// the value at which and above which cells are obstacles in the maps sent from outside
-	// the default is defined above
+	/*
+	 * the value at which and above which cells are obstacles in the maps sent from outside
+	 * the default is defined above
+	 */
 	unsigned char obsthresh;
 
-	// the value at which and above which until obsthresh (not including it)
-	// cells have the nearest obstacle at distance smaller than or equal to
-	// the inner circle of the robot. In other words, the robot is definitely
-	// colliding with the obstacle, independently of its orientation
-	// if no such cost is known, then it should be set to obsthresh (if center
-	// of the robot collides with obstacle, then the whole robot collides with
-	// it independently of its rotation)
+	/* 
+	 * the value at which and above which until obsthresh (not including it)
+	 * cells have the nearest obstacle at distance smaller than or equal to
+	 * the inner circle of the robot. In other words, the robot is definitely
+	 * colliding with the obstacle, independently of its orientation
+	 * if no such cost is known, then it should be set to obsthresh (if center
+	 * of the robot collides with obstacle, then the whole robot collides with
+	 * it independently of its rotation)
+	 */
 	unsigned char cost_inscribed_thresh;
 
-	// the value at which and above which until cost_inscribed_thresh (not including it) cells
-	// **may** have a nearest osbtacle within the distance that is in between
-	// the robot inner circle and the robot outer circle
-	// any cost below this value means that the robot will NOT collide with any
-	// obstacle, independently of its orientation
-	// if no such cost is known, then it should be set to 0 or -1 (then no cell
-	// cost will be lower than it, and therefore the robot's footprint will
-	// always be checked)
+	/*
+	 * the value at which and above which until cost_inscribed_thresh (not including it) cells
+	 * **may** have a nearest osbtacle within the distance that is in between
+	 * the robot inner circle and the robot outer circle
+	 * any cost below this value means that the robot will NOT collide with any
+	 * obstacle, independently of its orientation
+	 * if no such cost is known, then it should be set to 0 or -1 (then no cell
+	 * cost will be lower than it, and therefore the robot's footprint will
+	 * always be checked)
+	 */
 	int cost_possibly_circumscribed_thresh; // it has to be integer, because -1 means that it is not provided.
 	
-	/* Maybe below parameter for ackermann vehicle with this state have no sense */
-	//double nominalvel_mpersecs;
-	//double timetoturn45degsinplace_secs;
-	
 	double cellsize_m;
+	std::vector<double> velocities;
 
 	/* Maybe below parameter is not really useful */
 	//int dXY[NAVXYTHETALAT_DXYWIDTH][2];
 	
 	/* FOR ACTIONS MUST BE DEFINED MORE COMPLEX DATA STRUCTURES */
+	/* SEE IF USEFUL DATA STRUCTURE CREATED OR IS ENOUGH A VECTOR OF VECTORS */
 	/* Actions... wait definition before use */
 	//array of actions, ActionsV[i][j] - jth action for sourcetheta/sourcev combination = i
 	//EnvNAVXYTHETAVAction_t** ActionsV;
-	//PredActionsV[i] - vector of pointers to the actions that result in a state with combination theta/v = i
+	std::vector<sbpl_xythetav_groupaction_t> ActionsV;
+	
+	/* SEE IF NEEDED A PREDECESSOR ARRAY */
+	//PredActionsV[i] - vector of pointers to the actions that result in a state with given combination theta/v = i
 	//std::vector<EnvNAVXYTHETALATAction_t*>* PredActionsV; 
 
-	//int actionwidth; //number of motion primitives
-	//std::vector<SBPL_xytheta_mprimitive> mprimV;
+	int actionwidth; //number of motion primitives
+	std::vector<SBPL_xythetav_mprimitive> mprimV;
 
-	//std::vector<sbpl_2Dpt_t> FootprintPolygon;
+	std::vector<sbpl_2Dpt_t> FootprintPolygon;
 } EnvNAVXYTHETAVConfig_t;
 
 typedef struct ENVNAVXYTHETAVHASHENTRY
@@ -231,15 +244,17 @@ protected:
 
 	virtual void ReadConfiguration(FILE* fCfg);
 
-	virtual void InitializeEnvConfig();
+	virtual void PrecomputeActionswithCompleteMotionPrimitive(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
+	
+	virtual void InitializeEnvConfig(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
 
-	virtual unsigned int GETHASHBIN(int x, int y, int theta, double v);
+	virtual unsigned int GETHASHBIN(unsigned int x, unsigned int y, unsigned int theta, unsigned int v);
 
 	virtual void PrintHashTableHist();
 
-	virtual EnvNAVXYTHETAVHashEntry_t* GetHashEntry(int x, int y, int theta, int v);
+	virtual EnvNAVXYTHETAVHashEntry_t* GetHashEntry(unsigned int x, unsigned int y, unsigned int theta, unsigned int v);
 
-	virtual EnvNAVXYTHETAVHashEntry_t* CreateNewHashEntry(int x, int y, int theta, int v);
+	virtual EnvNAVXYTHETAVHashEntry_t* CreateNewHashEntry(unsigned int x, unsigned int y, unsigned int theta, unsigned int v);
 
 	virtual void CreateStartandGoalStates();
 

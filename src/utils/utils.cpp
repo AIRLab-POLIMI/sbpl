@@ -384,6 +384,14 @@ int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS)
     return (int)(normalizeAngle(fTheta + thetaBinSize / 2.0) / (2.0 * PI_CONST) * (NUMOFANGLEVALS));
 }
 
+int ContV2Disc(double fV, vector<double> velocities){
+	int i=0;
+	
+	for(;i<velocities.size() && velocities[i]!=fV;i++);
+	
+	return i;
+}
+
 //input angle should be in radians
 //counterclockwise is positive
 //output is an angle in the range of from 0 to 2*PI
