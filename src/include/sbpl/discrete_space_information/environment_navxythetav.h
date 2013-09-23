@@ -39,8 +39,8 @@ class MDPConfig;
 typedef struct
 {
 	int motprimID;
-	int starttheta_c;
-	int starttheta_v;
+	int start_theta_disc;
+	int start_v_disc;
 	//int additionalactioncostmult;
 	sbpl_xy_theta_v_cell_t endcell;
 	std::vector<sbpl_xy_theta_v_pt_t> intermptV;
@@ -126,13 +126,13 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	/* FOR ACTIONS MUST BE DEFINED MORE COMPLEX DATA STRUCTURES */
 	/* SEE IF USEFUL DATA STRUCTURE CREATED OR IS ENOUGH A VECTOR OF VECTORS */
 	/* Actions... wait definition before use */
-	//array of actions, ActionsV[i][j] - jth action for sourcetheta/sourcev combination = i
+	//array of actions, ActionsV[i][j] - jth action for sourcetheta+sourcev*NUMTHETA = i
 	//EnvNAVXYTHETAVAction_t** ActionsV;
-	std::vector<sbpl_xythetav_groupaction_t> ActionsV;
+	std::vector<std::vector<EnvNAVXYTHETAVAction_t> > ActionsV;
 	
 	/* SEE IF NEEDED A PREDECESSOR ARRAY */
-	//PredActionsV[i] - vector of pointers to the actions that result in a state with given combination theta/v = i
-	//std::vector<EnvNAVXYTHETALATAction_t*>* PredActionsV; 
+	//PredActionsV[i] - vector of pointers to the actions that result in a state with theta+v*NUMTHETA = i
+	std::vector<EnvNAVXYTHETAVAction_t*>* PredActionsV;
 
 	int actionwidth; //number of motion primitives
 	std::vector<SBPL_xythetav_mprimitive> mprimV;
@@ -175,6 +175,21 @@ typedef struct
 class EnvironmentNAVXYTHETAV : public DiscreteSpaceInformation
 {
 public:
+    EnvironmentNAVXYTHETAV();
+	
+	/**
+     * \brief initialization of environment from file. See .cfg files for
+     *        examples it also takes the perimeter of the robot with respect to some
+     *        reference point centered at x=0,y=0, orientation = 0 (along x axis) and speed = 0.
+     *        The perimeter is defined in meters as a sequence of vertices of a
+     *        polygon defining the perimeter. If vector is of zero size, then robot
+     *        is assumed to be point robot (you may want to inflate all obstacles by
+     *        its actual radius) Motion primitives file defines the motion primitives
+     *        available to the robot
+     */
+    virtual bool InitializeEnv(const char* sEnvFile, const std::vector<sbpl_2Dpt_t>& perimeterptsV,
+                               const char* sMotPrimFile);
+	
 	/**
 	* \brief see comments on the same function in the parent class
 	*/
@@ -259,6 +274,11 @@ protected:
 	virtual void CreateStartandGoalStates();
 
 	virtual void InitializeEnvironment();
+	
+	virtual bool ReadMotionPrimitives(FILE* fMotPrims);
+	virtual bool ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive* pMotPrim, FILE* fIn);
+	virtual bool ReadSingleCell(sbpl_xy_theta_v_cell_t* cell, FILE* fIn);
+	virtual bool ReadSinglePose(sbpl_xy_theta_v_pt_t* pose, FILE* fIn);
 
 	/* maybe not useful */
 	/*virtual void AddAllOutcomes(int SourceX, int SourceY, int SourceTheta,

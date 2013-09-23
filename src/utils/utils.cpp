@@ -392,6 +392,16 @@ int ContV2Disc(double fV, vector<double> velocities){
 	return i;
 }
 
+int DiscV2Cont(int nV, vector<double> velocities){
+	if(nV < 0)
+		return velocities[0];
+	
+	if(nV > velocities.size())
+		return velocities[velocities.size()-1];
+	
+	return velocities[nV];
+}
+
 //input angle should be in radians
 //counterclockwise is positive
 //output is an angle in the range of from 0 to 2*PI

@@ -18,6 +18,7 @@
 #include <sbpl/utils/mdpconfig.h>
 #include <string.h>
 #include <stdlib.h>
+#include <cmath>
 
 using namespace std;
 
@@ -518,6 +519,243 @@ void EnvironmentNAVXYTHETAV::InitializeEnvironment()
     CreateStartandGoalStates();
 }
 
+bool EnvironmentNAVXYTHETAV::ReadMotionPrimitives(FILE* fMotPrims){
+	char sTemp[1024], sExpected[1024];
+    float fTemp;
+    int dTemp;
+    int totalNumofActions = 0;
+
+    SBPL_PRINTF("Reading in motion primitives...");
+
+    //read in the resolution
+    strcpy(sExpected, "resolution_m:");
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        return false;
+    }
+    if (fscanf(fMotPrims, "%f", &fTemp) == 0) return false;
+    if (fabs(fTemp - EnvNAVXYTHETAVCfg.cellsize_m) > ERR_EPS) {
+        SBPL_ERROR("ERROR: invalid resolution %f (instead of %f) in the dynamics file\n", fTemp,
+                   EnvNAVXYTHETAVCfg.cellsize_m);
+        return false;
+    }
+
+    //read in the angular resolution
+    strcpy(sExpected, "numberofangles:");
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        return false;
+    }
+    if (fscanf(fMotPrims, "%d", &dTemp) == 0) return false;
+    if (dTemp != EnvNAVXYTHETAVCfg.NumThetaDirs) {
+        SBPL_ERROR("ERROR: invalid angular resolution %d angles (instead of %d angles) in the motion primitives file\n",
+                   dTemp, EnvNAVXYTHETAVCfg.NumThetaDirs);
+        return false;
+    }
+    
+    //read in the velocity resolution
+    strcpy(sExpected, "numberofvelocities:");
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        return false;
+    }
+    if (fscanf(fMotPrims, "%d", &dTemp) == 0) return false;
+    if (dTemp != EnvNAVXYTHETAVCfg.numV) {
+        SBPL_ERROR("ERROR: invalid velocity resolution %d velocities (instead of %d velocities) in the motion primitives file\n",
+                   dTemp, EnvNAVXYTHETAVCfg.numV);
+        return false;
+    }
+    
+    //read in the velocity values
+    strcpy(sExpected, "velocities:");
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        return false;
+    }
+    for(int i=0;i<EnvNAVXYTHETAVCfg.numV;i++){
+		if (fscanf(fMotPrims, "%f", &fTemp) == 0) return false;
+		if (fTemp != EnvNAVXYTHETAVCfg.velocities[i]) {
+			SBPL_ERROR("ERROR: invalid velocity value %f velocity (instead of %f velocity) in the motion primitives file\n",
+					fTemp, EnvNAVXYTHETAVCfg.velocities[i]);
+			return false;
+		}
+	}
+
+    //read in the total number of actions
+    strcpy(sExpected, "totalnumberofprimitives:");
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        return false;
+    }
+    if (fscanf(fMotPrims, "%d", &totalNumofActions) == 0) {
+        return false;
+    }
+
+    for (int i = 0; i < totalNumofActions; i++) {
+        SBPL_xythetav_mprimitive motprim;
+
+        if (ReadSingleMotionPrimitive(&motprim, fMotPrims) == false) return false;
+
+        EnvNAVXYTHETAVCfg.mprimV.push_back(motprim);
+    }
+    SBPL_PRINTF("done reading of motion primitives");
+
+    return true;
+}
+
+bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive* pMotPrim, FILE* fIn){
+	char sTemp[1024];
+	int dTemp;
+	char sExpected[1024];
+	int numofIntermPoses;
+
+	//read in actionID
+	strcpy(sExpected, "primID:");
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	if (strcmp(sTemp, sExpected) != 0) {
+		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+		return false;
+	}
+	if (fscanf(fIn, "%d", &pMotPrim->motprimID) != 1) return false;
+
+	//read in start cell
+	strcpy(sExpected, "startpose_disc:");
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	if (strcmp(sTemp, sExpected) != 0) {
+		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+		return false;
+	}
+	if (fscanf(fIn, "%d", &dTemp) == 0) {
+		SBPL_ERROR("ERROR reading startangle\n");
+		return false;
+	}
+	if (fscanf(fIn, "%d", &dTemp) == 0) {
+		SBPL_ERROR("ERROR reading startangle\n");
+		return false;
+	}
+	if (fscanf(fIn, "%d", &dTemp) == 0) {
+		SBPL_ERROR("ERROR reading startangle\n");
+		return false;
+	}
+	pMotPrim->start_theta_disc = dTemp;
+	if (fscanf(fIn, "%d", &dTemp) == 0) {
+		SBPL_ERROR("ERROR reading startangle\n");
+		return false;
+	}
+	pMotPrim->start_v_disc = dTemp;
+
+	//read in end cell
+	strcpy(sExpected, "endpose_disc:");
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	if (strcmp(sTemp, sExpected) != 0) {
+		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+		return false;
+	}
+
+	if (ReadSingleCell(&pMotPrim->endcell, fIn) == false) {
+		SBPL_ERROR("ERROR: failed to read in endsearchpose\n");
+		return false;
+	}
+
+	//read in action cost
+	/*
+	strcpy(sExpected, "additionalactioncostmult:");
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	if (strcmp(sTemp, sExpected) != 0) {
+		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+		return false;
+	}
+	if (fscanf(fIn, "%d", &dTemp) != 1) return false;
+	pMotPrim->additionalactioncostmult = dTemp;
+	*/
+
+	//read in intermediate poses
+	strcpy(sExpected, "intermediateposes:");
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	if (strcmp(sTemp, sExpected) != 0) {
+		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+		return false;
+	}
+	if (fscanf(fIn, "%d", &numofIntermPoses) != 1) return false;
+	for (int i = 0; i < numofIntermPoses; i++) {
+		sbpl_xy_theta_v_pt_t intermpose;
+		if (ReadSinglePose(&intermpose, fIn) == false) {
+			SBPL_ERROR("ERROR: failed to read in intermediate poses\n");
+			return false;
+		}
+		pMotPrim->intermptV.push_back(intermpose);
+	}
+
+	//check that the last pose corresponds correctly to the last pose
+	sbpl_xy_theta_v_pt_t sourcepose;
+	sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
+	sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
+	sourcepose.theta = DiscTheta2Cont(pMotPrim->start_theta_disc, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	sourcepose.v = DiscV2Cont(pMotPrim->start_v_disc, EnvNAVXYTHETAVCfg.velocities);
+	double mp_endx_m = sourcepose.x + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].x;
+	double mp_endy_m = sourcepose.y + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].y;
+	double mp_endtheta_rad = pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].theta;
+	double mp_endv_ms = pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].v;
+	int endx_disc = CONTXY2DISC(mp_endx_m, EnvNAVXYTHETAVCfg.cellsize_m);
+	int endy_disc = CONTXY2DISC(mp_endy_m, EnvNAVXYTHETAVCfg.cellsize_m);
+	int endtheta_disc = ContTheta2Disc(mp_endtheta_rad, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	int endv_disc = ContV2Disc(mp_endv_ms, EnvNAVXYTHETAVCfg.velocities);
+	if (endx_disc != pMotPrim->endcell.x || endy_disc != pMotPrim->endcell.y || endtheta_disc != pMotPrim->endcell.theta || endv_disc != pMotPrim->endcell.v) {
+		SBPL_ERROR( "ERROR: incorrect primitive %d with startangle=%d and startv=%d "
+				"last interm point %f %f %f %f does not match end pose %d %d %d %d\n",
+				pMotPrim->motprimID, pMotPrim->start_theta_disc, pMotPrim->start_v_disc,
+				pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].x,
+				pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].y,
+				pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].theta,
+				pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].v,
+				pMotPrim->endcell.x, pMotPrim->endcell.y,
+				pMotPrim->endcell.theta, pMotPrim->endcell.v);
+		return false;
+	}
+
+	return true;
+}
+
+bool EnvironmentNAVXYTHETAV::ReadSingleCell(sbpl_xy_theta_v_cell_t* cell, FILE* fIn){
+	char sTemp[60];
+
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	cell->x = atoi(sTemp);
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	cell->y = atoi(sTemp);
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	cell->theta = atoi(sTemp);
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+	cell->v = atoi(sTemp);
+	
+	//normalize the angle
+	cell->theta = NORMALIZEDISCTHETA(cell->theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+
+	return true;
+}
+
+bool EnvironmentNAVXYTHETAV::ReadSinglePose(sbpl_xy_theta_v_pt_t* pose, FILE* fIn){
+	char sTemp[60];
+
+    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    pose->x = atof(sTemp);
+    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    pose->y = atof(sTemp);
+    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    pose->theta = atof(sTemp);
+	if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    pose->v = atof(sTemp);
+
+    pose->theta = normalizeAngle(pose->theta);
+
+    return true;
+}
+
 /*void EnvironmentNAVXYTHETAV::AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2, unsigned int SourceX3,
                                     unsigned int SourceX4, CMDPACTION* action, int cost)
 {
@@ -563,27 +801,41 @@ void EnvironmentNAVXYTHETAV::ComputeHeuristicValues()
 
 //-----------interface with outside functions-----------------------------------
 
-bool EnvironmentNAVXYTHETAV::InitializeEnv(const char* sEnvFile)
+bool EnvironmentNAVXYTHETAV::InitializeEnv(const char* sEnvFile, const vector<sbpl_2Dpt_t>& perimeterptsV, const char* sMotPrimFile)
 {
-	vector<SBPL_xythetav_mprimitive> temp;
-    FILE* fCfg = fopen(sEnvFile, "r");
-    if (fCfg == NULL) {
-        SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
-        throw new SBPL_Exception();
-    }
-    ReadConfiguration(fCfg);
-    fclose(fCfg);
+	EnvNAVXYTHETAVCfg.FootprintPolygon = perimeterptsV;
 
-    //Initialize other parameters of the environment
-    InitializeEnvConfig(&temp);
+	FILE* fCfg = fopen(sEnvFile, "r");
+	if (fCfg == NULL) {
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
+	}
+	ReadConfiguration(fCfg);
+	fclose(fCfg);
 
-    //initialize Environment
-    InitializeEnvironment();
+	if (sMotPrimFile != NULL) {
+		FILE* fMotPrim = fopen(sMotPrimFile, "r");
+		if (fMotPrim == NULL) {
+			SBPL_ERROR("ERROR: unable to open %s\n", sMotPrimFile);
+			throw new SBPL_Exception();
+		}
+		if (ReadMotionPrimitives(fMotPrim) == false) {
+			SBPL_ERROR("ERROR: failed to read in motion primitive file\n");
+			throw new SBPL_Exception();
+		}
+		InitGeneral(&EnvNAVXYTHETAVCfg.mprimV);
+		fclose(fMotPrim);
+	}
+	else
+		InitGeneral( NULL);
 
-    //pre-compute heuristics
-    ComputeHeuristicValues();
+	SBPL_PRINTF("size of env: %d by %d\n", EnvNAVXYTHETAVCfg.EnvWidth_c, EnvNAVXYTHETAVCfg.EnvHeight_c);
 
-    return true;
+	return true;
+}
+
+bool EnvironmentNAVXYTHETAV::InitializeEnv(const char* sEnvFile){
+	return false;
 }
 
 bool EnvironmentNAVXYTHETAV::InitializeMDPCfg(MDPConfig *MDPCfg)

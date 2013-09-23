@@ -338,6 +338,13 @@ int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS);
 int ContV2Disc(double fV, std::vector<double>);
 
 /**
+ * \brief converts discrete version of velocity into continuous value
+ *
+ * \note maps corresponding vector values
+ */
+int DiscV2Cont(int nV, std::vector<double> velocities);
+
+/**
  * \note counterclockwise is positive
  * \param angle input angle should be in radians
  * \return output is an angle in the range of from 0 to 2*PI
