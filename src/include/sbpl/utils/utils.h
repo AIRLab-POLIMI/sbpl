@@ -372,9 +372,19 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
 void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_pt_t> poses,
                          std::vector<sbpl_2Dcell_t>* cells, double res);
 
+void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_v_pt_t> poses, 
+						 std::vector<sbpl_2Dcell_t>* cells, double res);
+
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
                             sbpl_xy_theta_pt_t pose, double res);
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
+                            sbpl_xy_theta_v_pt_t pose, double res);
+
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
+                            double res);
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_pt_t pose,
                             double res);
 
 void writePlannerStats(std::vector<PlannerStats> s, FILE* fout);

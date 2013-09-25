@@ -20,15 +20,17 @@
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/utils.h>
 
-/* Vedere se serve questa define */
-#define NAVXYTHETAV_MAXACTIONSWIDTH 9
-
 #define NAVXYTHETAV_DEFAULTOBSTHRESHOLD 254
+#define NAVXYTHETAV_DEFAULTTHETADIRS 16
+#define NAVXYTHETAV_DEFAULTMEDIUMVELOCITY 8.0
+
+#define NAVXYTHETAV_COSTMULT_MTOMM 1000
 
 //class CMDPACTION;
 
 class CMDPSTATE;
 class MDPConfig;
+class SBPL2DGridSearch;
 
 /* 
 * Missing the defintion of action. In xytheta is used also an heuristic
@@ -128,13 +130,13 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	/* Actions... wait definition before use */
 	//array of actions, ActionsV[i][j] - jth action for sourcetheta+sourcev*NUMTHETA = i
 	//EnvNAVXYTHETAVAction_t** ActionsV;
-	std::vector<std::vector<EnvNAVXYTHETAVAction_t> > ActionsV;
+	std::vector<std::vector<EnvNAVXYTHETAVAction_t>* > *ActionsV;
 	
 	/* SEE IF NEEDED A PREDECESSOR ARRAY */
 	//PredActionsV[i] - vector of pointers to the actions that result in a state with theta+v*NUMTHETA = i
-	std::vector<EnvNAVXYTHETAVAction_t*>* PredActionsV;
+	std::vector<EnvNAVXYTHETAVAction_t*> *PredActionsV;
 
-	int actionwidth; //number of motion primitives
+	//int actionwidth; //number of motion primitives
 	std::vector<SBPL_xythetav_mprimitive> mprimV;
 
 	std::vector<sbpl_2Dpt_t> FootprintPolygon;
@@ -234,6 +236,11 @@ public:
 	* \brief see comments on the same function in the parent class
 	*/
 	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
+	
+	/**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics);
 
 	/**
 	* \brief see comments on the same function in the parent class
@@ -250,18 +257,22 @@ public:
 	*/
 	virtual void PrintEnv_Config(FILE* fOut);
 
-	~EnvironmentNAVXYTHETAV() { }
+	~EnvironmentNAVXYTHETAV();
 
 protected:
 	//member variables
 	EnvNAVXYTHETAVConfig_t EnvNAVXYTHETAVCfg;
 	EnvironmentNAVXYTHETAV_t EnvNAVXYTHETAV;
+	std::vector<sbpl_xy_theta_v_cell_t> affectedsuccstatesV; //arrays of states whose outgoing actions cross cell 0,0
+	std::vector<sbpl_xy_theta_v_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
+	
+	//2D search for heuristic computations
+    bool bNeedtoRecomputeStartHeuristics; //set whenever grid2Dsearchfromstart needs to be re-executed
+    bool bNeedtoRecomputeGoalHeuristics; //set whenever grid2Dsearchfromgoal needs to be re-executed
+    SBPL2DGridSearch* grid2Dsearchfromstart; //computes h-values that estimate distances from start x,y to all cells
+    SBPL2DGridSearch* grid2Dsearchfromgoal; //computes h-values that estimate distances to goal x,y from all cells
 
 	virtual void ReadConfiguration(FILE* fCfg);
-
-	virtual void PrecomputeActionswithCompleteMotionPrimitive(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
-	
-	virtual void InitializeEnvConfig(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
 
 	virtual unsigned int GETHASHBIN(unsigned int x, unsigned int y, unsigned int theta, unsigned int v);
 
@@ -272,6 +283,12 @@ protected:
 	virtual EnvNAVXYTHETAVHashEntry_t* CreateNewHashEntry(unsigned int x, unsigned int y, unsigned int theta, unsigned int v);
 
 	virtual void CreateStartandGoalStates();
+	
+	virtual void ComputeReplanningDataforAction(EnvNAVXYTHETAVAction_t* action);
+	virtual void ComputeReplanningData();
+	virtual void PrecomputeActionswithCompleteMotionPrimitive(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
+	virtual void InitializeEnvConfig(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
+	virtual bool InitGeneral(std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
 
 	virtual void InitializeEnvironment();
 	
@@ -285,6 +302,9 @@ protected:
 								double SourceV, CMDPACTION* action, int cost);*/
 
 	virtual void ComputeHeuristicValues();
+	virtual void PrintHeuristicValues();
+	
+	virtual double EuclideanDistance_m(int x1, int y1, int x2, int y2);
 };
 
 #endif

@@ -785,6 +785,21 @@ void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_pt_t>
     }
 }
 
+void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_v_pt_t> poses, vector<sbpl_2Dcell_t>* cells,
+                         double res)
+{
+    vector<sbpl_xy_theta_pt_t> ps;
+
+    //call get footprint on the rest of the points
+    for (int i = 0; i < poses.size(); i++) {
+        ps.at(i).x=poses.at(i).x;
+		ps.at(i).y=poses.at(i).y;
+		ps.at(i).theta=poses.at(i).theta;
+    }
+
+    get_2d_motion_cells(polygon, ps, cells, res);
+}
+
 //This function is inefficient and should be avoided if possible (you should
 //use overloaded functions that uses a set for the cells)!
 void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
@@ -801,6 +816,18 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* 
     for (set<sbpl_2Dcell_t>::iterator it = cell_set.begin(); it != cell_set.end(); it++) {
         cells->push_back(*it);
     }
+}
+
+void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_pt_t pose,
+                            double res)
+{
+    sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
 }
 
 void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose, double res)
@@ -933,6 +960,16 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cel
             if (bfs.get_distance(i, j) < 0) cells->insert(sbpl_2Dcell_t(i - 1 + minx, j - 1 + miny));
         }
     }
+}
+
+void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_pt_t pose, double res){
+	sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
 }
 
 void writePlannerStats(vector<PlannerStats> s, FILE* fout)
