@@ -23,9 +23,14 @@
 
 using namespace std;
 
-//extern clock_t time3_addallout;
-//extern clock_t time_gethash;
-//extern clock_t time_createhash;
+#if TIME_DEBUG
+static clock_t time3_addallout = 0;
+static clock_t time_gethash = 0;
+static clock_t time_createhash = 0;
+static clock_t time_getsuccs = 0;
+#endif
+
+static long int checks = 0;
 
 //function prototypes
 
@@ -1410,14 +1415,118 @@ void EnvironmentNAVXYTHETAV::SetAllPreds(CMDPSTATE* state)
 
 void EnvironmentNAVXYTHETAV::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
 {
-	SBPL_ERROR("ERROR in EnvNAVXYTHETAV... function: GetSuccs is undefined\n");
-	throw new SBPL_Exception();
+	GetSuccs(SourceStateID, SuccIDV, CostV, NULL);
+}
+
+void EnvironmentNAVXYTHETAV::GetSuccs(int sourceStateID, std::vector<int>* succIDV, std::vector<int>* costV, std::vector<EnvNAVXYTHETAVAction_t*>* actionindV){
+	int aind;
+
+#if TIME_DEBUG
+    clock_t currenttime = clock();
+#endif
+
+    //clear the successor array
+    succIDV->clear();
+    costV->clear();
+    //succIDV->reserve(EnvNAVXYTHETAVCfg.actionwidth);
+    //costV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    if (actionindV != NULL) {
+        actionindV->clear();
+        //actionindV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    }
+
+    //goal state should be absorbing
+    if (sourceStateID == EnvNAVXYTHETAV.goalstateid) return;
+
+    //get X, Y for the state
+    EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[sourceStateID];
+	
+	int vector_index = (unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta;
+
+    //iterate through actions
+    for (aind = 0; aind < EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->size(); aind++) {
+        EnvNAVXYTHETAVAction_t* nav4daction = &EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind);
+        int newX = HashEntry->x + nav4daction->dX;
+        int newY = HashEntry->y + nav4daction->dY;
+        int newTheta = NORMALIZEDISCTHETA(nav4daction->endtheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+		int newV = nav4daction->endv;
+
+        //skip the invalid cells
+        if (!IsValidCell(newX, newY)) continue;
+
+        //get cost
+        int cost = GetActionCost(HashEntry->x, HashEntry->y, HashEntry->theta, HashEntry->v, nav4daction);
+        if (cost >= INFINITECOST) continue;
+
+        EnvNAVXYTHETAVHashEntry_t* OutHashEntry;
+        if ((OutHashEntry = GetHashEntry(newX, newY, newTheta, newV)) == NULL) {
+            //have to create a new entry
+            OutHashEntry = CreateNewHashEntry(newX, newY, newTheta, newV);
+        }
+
+        succIDV->push_back(OutHashEntry->stateID);
+        costV->push_back(cost);
+        if (actionindV != NULL) actionindV->push_back(nav4daction);
+    }
+
+#if TIME_DEBUG
+    time_getsuccs += clock()-currenttime;
+#endif
 }
 
 void EnvironmentNAVXYTHETAV::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
 {
-	SBPL_ERROR("ERROR in EnvNAVXYTHETAV... function: GetPreds is undefined\n");
-	throw new SBPL_Exception();
+	//TODO- to support tolerance, need:
+    // a) generate preds for goal state based on all possible goal state variable settings,
+    // b) change goal check condition in gethashentry 
+    // c) change getpredsofchangedcells and getsuccsofchangedcells functions
+
+    int aind;
+
+#if TIME_DEBUG
+    clock_t currenttime = clock();
+#endif
+
+    //get X, Y for the state
+    EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[TargetStateID];
+
+    //clear the preds array
+    PredIDV->clear();
+    CostV->clear();
+    PredIDV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size());
+    CostV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size());
+
+    //iterate through actions
+    vector<EnvNAVXYTHETAVAction_t*>* actionsV = &EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta];
+    for (aind = 0; aind < (int)EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size(); aind++) {
+
+        EnvNAVXYTHETAVAction_t* nav4daction = actionsV->at(aind);
+
+        int predX = HashEntry->x - nav4daction->dX;
+        int predY = HashEntry->y - nav4daction->dY;
+        int predTheta = nav4daction->starttheta;
+		int predV = nav4daction->startv;
+
+        //skip the invalid cells
+        if (!IsValidCell(predX, predY)) continue;
+
+        //get cost
+        int cost = GetActionCost(predX, predY, predTheta, predV, nav4daction);
+        if (cost >= INFINITECOST) continue;
+
+        EnvNAVXYTHETAVHashEntry_t* OutHashEntry;
+        if ((OutHashEntry = GetHashEntry(predX, predY, predTheta, predV)) == NULL) {
+            //have to create a new entry
+            OutHashEntry = CreateNewHashEntry(predX, predY, predTheta, predV);
+        }
+
+        PredIDV->push_back(OutHashEntry->stateID);
+        CostV->push_back(cost);
+    }
+
+#if TIME_DEBUG
+    time_getsuccs += clock()-currenttime;
+#endif
 }
 
 int EnvironmentNAVXYTHETAV::SizeofCreatedEnv()
@@ -1459,6 +1568,76 @@ double EnvironmentNAVXYTHETAV::EuclideanDistance_m(int x1, int y1, int x2, int y
 {
     int sqdist = ((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     return EnvNAVXYTHETAVCfg.cellsize_m * sqrt((double)sqdist);
+}
+
+bool EnvironmentNAVXYTHETAV::IsValidCell(int x, int y){
+	return (x >= 0 && x < EnvNAVXYTHETAVCfg.EnvWidth_c && y >= 0 && y < EnvNAVXYTHETAVCfg.EnvHeight_c &&
+            EnvNAVXYTHETAVCfg.Grid2D[x][y] < EnvNAVXYTHETAVCfg.obsthresh);
+}
+
+int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTheta, int sourceV, EnvNAVXYTHETAVAction_t* action){
+	sbpl_2Dcell_t cell;
+    sbpl_xy_theta_v_cell_t interm4Dcell;
+    int i;
+
+    //TODO - go over bounding box (minpt and maxpt) to test validity and skip
+    //testing boundaries below, also order intersect cells so that the four
+    //farthest pts go first
+
+    if (!IsValidCell(sourceX, sourceY)) return INFINITECOST;
+    if (!IsValidCell(sourceX + action->dX, sourceY + action->dY)) return INFINITECOST;
+
+    if (EnvNAVXYTHETAVCfg.Grid2D[sourceX + action->dX][sourceY + action->dY] >=
+        EnvNAVXYTHETAVCfg.cost_inscribed_thresh) 
+    {
+        return INFINITECOST;
+    }
+
+    //need to iterate over discretized center cells and compute cost based on them
+    unsigned char maxcellcost = 0;
+    for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
+        interm4Dcell = action->interm3DcellsV.at(i);
+        interm4Dcell.x = interm4Dcell.x + sourceX;
+        interm4Dcell.y = interm4Dcell.y + sourceY;
+
+        if (interm4Dcell.x < 0 || interm4Dcell.x >= EnvNAVXYTHETAVCfg.EnvWidth_c || interm4Dcell.y < 0
+            || interm4Dcell.y >= EnvNAVXYTHETAVCfg.EnvHeight_c) return INFINITECOST;
+
+        maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y]);
+
+        //check that the robot is NOT in the cell at which there is no valid orientation
+        if (maxcellcost >= EnvNAVXYTHETAVCfg.cost_inscribed_thresh) return INFINITECOST;
+    }
+
+    //check collisions that for the particular footprint orientation along the action
+    if (EnvNAVXYTHETAVCfg.FootprintPolygon.size() > 1 && (int)maxcellcost >=
+        EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh)
+    {
+        checks++;
+
+        for (i = 0; i < (int)action->intersectingcellsV.size(); i++) {
+            //get the cell in the map
+            cell = action->intersectingcellsV.at(i);
+            cell.x = cell.x + sourceX;
+            cell.y = cell.y + sourceY;
+
+            //check validity
+            if (!IsValidCell(cell.x, cell.y)) return INFINITECOST;
+
+            //if(EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y] > currentmaxcost)
+            ////cost computation changed: cost = max(cost of centers of the
+            //robot along action)
+            //	currentmaxcost = EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y];
+            //	//intersecting cells are only used for collision checking
+        }
+    }
+
+    //to ensure consistency of h2D:
+    maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX][sourceY]);
+    int currentmaxcost =
+            (int)__max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
+
+    return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
 }
 
 //------------------------------------------------------------------------------

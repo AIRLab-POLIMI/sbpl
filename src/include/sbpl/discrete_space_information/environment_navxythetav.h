@@ -300,11 +300,16 @@ protected:
 	/* maybe not useful */
 	/*virtual void AddAllOutcomes(int SourceX, int SourceY, int SourceTheta,
 								double SourceV, CMDPACTION* action, int cost);*/
+	
+	virtual void GetSuccs(int sourceStateID, std::vector<int>* succIDV, std::vector<int>* costV,
+                          std::vector<EnvNAVXYTHETAVAction_t*>* actionindV = NULL) = 0;
 
 	virtual void ComputeHeuristicValues();
 	virtual void PrintHeuristicValues();
 	
 	virtual double EuclideanDistance_m(int x1, int y1, int x2, int y2);
+	virtual bool IsValidCell(int x, int y);
+	virtual int GetActionCost(int sourceX, int sourceY, int sourceTheta, int sourceV, EnvNAVXYTHETAVAction_t* action);
 };
 
 #endif
