@@ -392,7 +392,7 @@ int ContV2Disc(double fV, vector<double> velocities){
 	return i;
 }
 
-int DiscV2Cont(int nV, vector<double> velocities){
+double DiscV2Cont(int nV, vector<double> velocities){
 	if(nV < 0)
 		return velocities[0];
 	

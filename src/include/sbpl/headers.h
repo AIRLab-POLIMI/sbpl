@@ -47,6 +47,7 @@
 #include <sbpl/discrete_space_information/environment_nav2D.h>
 #include <sbpl/discrete_space_information/environment_nav2Duu.h>
 #include <sbpl/discrete_space_information/environment_navxythetalat.h>
+#include <sbpl/discrete_space_information/environment_navxythetav.h>
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
 #include <sbpl/discrete_space_information/environment_XXX.h>

@@ -91,32 +91,32 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	unsigned char ** Grid2D;
 	
 	/*
-	 * the value at which and above which cells are obstacles in the maps sent from outside
-	 * the default is defined above
-	 */
+	* the value at which and above which cells are obstacles in the maps sent from outside
+	* the default is defined above
+	*/
 	unsigned char obsthresh;
 
 	/* 
-	 * the value at which and above which until obsthresh (not including it)
-	 * cells have the nearest obstacle at distance smaller than or equal to
-	 * the inner circle of the robot. In other words, the robot is definitely
-	 * colliding with the obstacle, independently of its orientation
-	 * if no such cost is known, then it should be set to obsthresh (if center
-	 * of the robot collides with obstacle, then the whole robot collides with
-	 * it independently of its rotation)
-	 */
+	* the value at which and above which until obsthresh (not including it)
+	* cells have the nearest obstacle at distance smaller than or equal to
+	* the inner circle of the robot. In other words, the robot is definitely
+	* colliding with the obstacle, independently of its orientation
+	* if no such cost is known, then it should be set to obsthresh (if center
+	* of the robot collides with obstacle, then the whole robot collides with
+	* it independently of its rotation)
+	*/
 	unsigned char cost_inscribed_thresh;
 
 	/*
-	 * the value at which and above which until cost_inscribed_thresh (not including it) cells
-	 * **may** have a nearest osbtacle within the distance that is in between
-	 * the robot inner circle and the robot outer circle
-	 * any cost below this value means that the robot will NOT collide with any
-	 * obstacle, independently of its orientation
-	 * if no such cost is known, then it should be set to 0 or -1 (then no cell
-	 * cost will be lower than it, and therefore the robot's footprint will
-	 * always be checked)
-	 */
+	* the value at which and above which until cost_inscribed_thresh (not including it) cells
+	* **may** have a nearest osbtacle within the distance that is in between
+	* the robot inner circle and the robot outer circle
+	* any cost below this value means that the robot will NOT collide with any
+	* obstacle, independently of its orientation
+	* if no such cost is known, then it should be set to 0 or -1 (then no cell
+	* cost will be lower than it, and therefore the robot's footprint will
+	* always be checked)
+	*/
 	int cost_possibly_circumscribed_thresh; // it has to be integer, because -1 means that it is not provided.
 	
 	double cellsize_m;
@@ -177,25 +177,35 @@ typedef struct
 class EnvironmentNAVXYTHETAV : public DiscreteSpaceInformation
 {
 public:
-    EnvironmentNAVXYTHETAV();
+	EnvironmentNAVXYTHETAV();
 	
 	/**
-     * \brief initialization of environment from file. See .cfg files for
-     *        examples it also takes the perimeter of the robot with respect to some
-     *        reference point centered at x=0,y=0, orientation = 0 (along x axis) and speed = 0.
-     *        The perimeter is defined in meters as a sequence of vertices of a
-     *        polygon defining the perimeter. If vector is of zero size, then robot
-     *        is assumed to be point robot (you may want to inflate all obstacles by
-     *        its actual radius) Motion primitives file defines the motion primitives
-     *        available to the robot
-     */
-    virtual bool InitializeEnv(const char* sEnvFile, const std::vector<sbpl_2Dpt_t>& perimeterptsV,
-                               const char* sMotPrimFile);
+	* \brief initialization of environment from file. See .cfg files for
+	*        examples it also takes the perimeter of the robot with respect to some
+	*        reference point centered at x=0,y=0, orientation = 0 (along x axis) and speed = 0.
+	*        The perimeter is defined in meters as a sequence of vertices of a
+	*        polygon defining the perimeter. If vector is of zero size, then robot
+	*        is assumed to be point robot (you may want to inflate all obstacles by
+	*        its actual radius) Motion primitives file defines the motion primitives
+	*        available to the robot
+	*/
+	virtual bool InitializeEnv(const char* sEnvFile, const std::vector<sbpl_2Dpt_t>& perimeterptsV,
+							const char* sMotPrimFile);
 	
 	/**
 	* \brief see comments on the same function in the parent class
 	*/
 	virtual bool InitializeEnv(const char* sEnvFile);
+	
+	/**
+	* \brief way to set up various parameters - see function body for the list of parameters
+	*/
+	virtual bool SetEnvParameter(const char* parameter, int value);
+	
+	/**
+	* \brief returns the value of specific parameter - see function body for the list of parameters
+	*/
+	virtual int GetEnvParameter(const char* parameter);
 
 	/**
 	* \brief see comments on the same function in the parent class
@@ -231,6 +241,15 @@ public:
 	* \brief see comments on the same function in the parent class
 	*/
 	virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
+	
+	/**
+	* \brief returns all successors states, costs of corresponding actions
+	*        and pointers to corresponding actions, each of which is a motion
+	*        primitive
+	*        if actionindV is NULL, then pointers to actions are not returned
+	*/
+	virtual void GetSuccs(int sourceStateID, std::vector<int>* succIDV, std::vector<int>* costV,
+						std::vector<EnvNAVXYTHETAVAction_t*>* actionindV = NULL);
 
 	/**
 	* \brief see comments on the same function in the parent class
@@ -238,9 +257,9 @@ public:
 	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
 	
 	/**
-     * \brief see comments on the same function in the parent class
-     */
-    virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics);
+	* \brief see comments on the same function in the parent class
+	*/
+	virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics);
 
 	/**
 	* \brief see comments on the same function in the parent class
@@ -256,6 +275,124 @@ public:
 	* \brief see comments on the same function in the parent class
 	*/
 	virtual void PrintEnv_Config(FILE* fOut);
+	
+	/**
+	* \brief initialize environment by parameters.
+	*/
+	virtual bool InitializeEnv(int width, int height, int numthetadirs, int numv, std::vector<double> velocities,
+							const unsigned char* mapdata,
+							double startx, double starty, double starttheta, double startv,
+							double goalx, double goaly, double goaltheta, double goalv,
+							const std::vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
+							unsigned char obsthresh, unsigned char cost_inscribed_thresh,
+							unsigned char cost_possibly_circumscribed_thresh, const char* sMotPrimFile);
+	
+	/**
+	* \brief update the traversability of a cell<x,y>
+	*/
+	virtual bool UpdateCost(int x, int y, unsigned char newcost);
+	
+	/**
+	* \brief re-setting the whole 2D map. 
+	* 			The function transforms from linear array mapdata to the 2D matrix used internally: Grid2D[x][y] = mapdata[x+y*width]
+	*/
+	virtual bool SetMap(const unsigned char* mapdata);
+	
+	/**
+	* \brief this function fill in Predecessor/Successor states of edges whose costs changed
+	*        It takes in an array of cells whose traversability changed, and
+	*        returns (in vector preds_of_changededgesIDV) the IDs of all
+	*        states that have outgoing edges that go through the changed
+	*        cells
+	*/
+	virtual void GetPredsOfChangedEdges(std::vector<sbpl_2Dcell_t> const * changedcellsV,
+										std::vector<int> *preds_of_changededgesIDV);
+	/**
+	* \brief same as GetPredsofChangedEdges, but returns successor states.
+	*        Both functions need to be present for incremental search
+	*/
+	virtual void GetSuccsOfChangedEdges(std::vector<sbpl_2Dcell_t> const * changedcellsV,
+										std::vector<int> *succs_of_changededgesIDV);
+	
+	/**
+	* returns true if cell is untraversable
+	*/
+	virtual bool IsObstacle(int x, int y);
+	
+	/**
+	* \brief returns false if robot intersects obstacles or lies outside of
+	*        the map or have an invalid velocity. Note this is pretty expensive
+	* 		  operation since it computes the footprint of the robot based on its x,y,theta
+	*/
+	virtual bool IsValidConfiguration(int x, int y, int theta, int v);
+	
+	/**
+	* \brief returns environment parameters. Useful for creating a copy environment.
+	*/
+	virtual void GetEnvParams(int *size_x, int *size_y, int * numthetadirs, int * numv, std::vector<double> * velocities,
+							double* startx, double* starty, double* starttheta, double * startv, 
+							double* goalx, double* goaly, double* goaltheta, double * goalv, double* cellsize_m,
+							unsigned char* cost_inscribed_thresh, unsigned char* cost_possibly_circumscribed_thresh,
+							unsigned char* obsthresh, std::vector<SBPL_xythetav_mprimitive>* motionprimitiveV);
+	
+	/**
+	* \brief get internal configuration data structure
+	*/
+	virtual const EnvNAVXYTHETAVConfig_t* GetEnvNavConfig();
+	
+	/**
+	* \brief prints time statistics
+	*/
+	virtual void PrintTimeStat(FILE* fOut);
+	
+	/**
+	* \brief returns the cost corresponding to the cell <x,y>
+	*/
+	virtual unsigned char GetMapCost(int x, int y);
+	
+	/**
+	* \brief returns true if cell is within map
+	*/
+	virtual bool IsWithinMapCell(int x, int y);
+	
+	/**
+	* \brief Transform a pose into discretized form.
+	*/
+	virtual bool PoseContToDisc(double px, double py, double pth, double pv, int &ix, int &iy, int &ith, int &iv) const;
+	
+	/** 
+	* \brief Transform grid indices into a continuous pose.
+	*/
+	virtual bool PoseDiscToCont(int ix, int iy, int ith, int iv, double &px, double &py, double &pth, double &pv) const;
+	
+	/**
+	* \brief sets start in meters, radians and m/s
+	*/
+	virtual int SetStart(double x, double y, double theta, double v);
+	
+	/**
+	* \brief sets goal in meters, radians and m/s
+	*/
+	virtual int SetGoal(double x, double y, double theta, double v);
+	
+	/**
+	* \brief returns state data of state with ID=stateID
+	*/
+	virtual void GetCoordFromState(int stateID, int& x, int& y, int& theta, int& v) const;
+	
+	/**
+	* \brief returns stateID for a state with data x,y,theta,v
+	*/
+	virtual int GetStateFromCoord(int x, int y, int theta, int v);
+	
+	/** \brief converts a path given by stateIDs into a sequence of coordinates.
+	*         Note that since motion primitives are short actions
+	*         represented as a sequence of points,
+	*         the path returned by this function contains much more points than the
+	*         number of points in the input path. The returned coordinates are in
+	*         meters,meters,radians,m/s
+	*/
+	virtual void ConvertStateIDPathintoXYThetaVPath(std::vector<int>* stateIDPath, std::vector<sbpl_xy_theta_v_pt_t>* xythetavPath);
 
 	~EnvironmentNAVXYTHETAV();
 
@@ -267,10 +404,12 @@ protected:
 	std::vector<sbpl_xy_theta_v_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
 	
 	//2D search for heuristic computations
-    bool bNeedtoRecomputeStartHeuristics; //set whenever grid2Dsearchfromstart needs to be re-executed
-    bool bNeedtoRecomputeGoalHeuristics; //set whenever grid2Dsearchfromgoal needs to be re-executed
-    SBPL2DGridSearch* grid2Dsearchfromstart; //computes h-values that estimate distances from start x,y to all cells
-    SBPL2DGridSearch* grid2Dsearchfromgoal; //computes h-values that estimate distances to goal x,y from all cells
+	bool bNeedtoRecomputeStartHeuristics; //set whenever grid2Dsearchfromstart needs to be re-executed
+	bool bNeedtoRecomputeGoalHeuristics; //set whenever grid2Dsearchfromgoal needs to be re-executed
+	SBPL2DGridSearch* grid2Dsearchfromstart; //computes h-values that estimate distances from start x,y to all cells
+	SBPL2DGridSearch* grid2Dsearchfromgoal; //computes h-values that estimate distances to goal x,y from all cells
+	
+	int iteration;
 
 	virtual void ReadConfiguration(FILE* fCfg);
 
@@ -300,9 +439,6 @@ protected:
 	/* maybe not useful */
 	/*virtual void AddAllOutcomes(int SourceX, int SourceY, int SourceTheta,
 								double SourceV, CMDPACTION* action, int cost);*/
-	
-	virtual void GetSuccs(int sourceStateID, std::vector<int>* succIDV, std::vector<int>* costV,
-                          std::vector<EnvNAVXYTHETAVAction_t*>* actionindV = NULL) = 0;
 
 	virtual void ComputeHeuristicValues();
 	virtual void PrintHeuristicValues();
@@ -310,6 +446,9 @@ protected:
 	virtual double EuclideanDistance_m(int x1, int y1, int x2, int y2);
 	virtual bool IsValidCell(int x, int y);
 	virtual int GetActionCost(int sourceX, int sourceY, int sourceTheta, int sourceV, EnvNAVXYTHETAVAction_t* action);
+	virtual void SetConfiguration(int width, int height, const unsigned char * mapdata, int startx, int starty,
+								int starttheta, int startv, int goalx, int goaly, int goaltheta, int goalv,
+							double cellsize_m, const std::vector<sbpl_2Dpt_t>& perimeterptsV);
 };
 
 #endif

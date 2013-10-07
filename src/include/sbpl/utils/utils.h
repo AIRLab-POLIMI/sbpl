@@ -342,7 +342,7 @@ int ContV2Disc(double fV, std::vector<double>);
  *
  * \note maps corresponding vector values
  */
-int DiscV2Cont(int nV, std::vector<double> velocities);
+double DiscV2Cont(int nV, std::vector<double> velocities);
 
 /**
  * \note counterclockwise is positive

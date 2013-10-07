@@ -42,3 +42,6 @@ target_link_libraries(test_sbpl sbpl)
 
 add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
 target_link_libraries(test_adjacency_list sbpl)
+
+add_executable(xythetav_test src/test/xythetav_test.cpp)
+target_link_libraries(xythetav_test sbpl)
