@@ -741,7 +741,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				*/
 				
 				//make the cost the max of the two times
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM;
+				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
 						//(int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * max(linear_time, angular_time)));
 				//use any additional cost multiplier
 				//EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
@@ -986,6 +986,7 @@ bool EnvironmentNAVXYTHETAV::ReadMotionPrimitives(FILE* fMotPrims){
 bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive* pMotPrim, FILE* fIn){
 	char sTemp[1024];
 	int dTemp;
+	double fTemp;
 	char sExpected[1024];
 	int numofIntermPoses;
 
@@ -1006,20 +1007,20 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 		return false;
 	}
 	if (fscanf(fIn, "%d", &dTemp) == 0) {
-		SBPL_ERROR("ERROR reading startangle\n");
+		SBPL_ERROR("ERROR reading start x\n");
 		return false;
 	}
 	if (fscanf(fIn, "%d", &dTemp) == 0) {
-		SBPL_ERROR("ERROR reading startangle\n");
+		SBPL_ERROR("ERROR reading start y\n");
 		return false;
 	}
 	if (fscanf(fIn, "%d", &dTemp) == 0) {
-		SBPL_ERROR("ERROR reading startangle\n");
+		SBPL_ERROR("ERROR reading start angle\n");
 		return false;
 	}
 	pMotPrim->start_theta_disc = dTemp;
 	if (fscanf(fIn, "%d", &dTemp) == 0) {
-		SBPL_ERROR("ERROR reading startangle\n");
+		SBPL_ERROR("ERROR reading start v\n");
 		return false;
 	}
 	pMotPrim->start_v_disc = dTemp;
@@ -1038,16 +1039,14 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 	}
 
 	//read in action cost
-	/*
 	strcpy(sExpected, "additionalactioncostmult:");
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
 	if (strcmp(sTemp, sExpected) != 0) {
 		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
 		return false;
 	}
-	if (fscanf(fIn, "%d", &dTemp) != 1) return false;
-	pMotPrim->additionalactioncostmult = dTemp;
-	*/
+	if (fscanf(fIn, "%lf", &fTemp) != 1) return false;
+	pMotPrim->additionalactioncostmult = fTemp;
 
 	//read in intermediate poses
 	strcpy(sExpected, "intermediateposes:");

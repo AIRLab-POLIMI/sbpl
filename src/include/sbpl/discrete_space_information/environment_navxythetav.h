@@ -43,7 +43,7 @@ typedef struct
 	int motprimID;
 	int start_theta_disc;
 	int start_v_disc;
-	//int additionalactioncostmult;
+	double additionalactioncostmult;
 	sbpl_xy_theta_v_cell_t endcell;
 	std::vector<sbpl_xy_theta_v_pt_t> intermptV;
 } SBPL_xythetav_mprimitive;
