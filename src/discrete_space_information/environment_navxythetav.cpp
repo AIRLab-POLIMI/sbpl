@@ -411,8 +411,8 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
-	/* NON MI CONVINCE, VEDERE COSA SUCCEDE */
-	for (y = 0; y < EnvNAVXYTHETAVCfg.EnvHeight_c; y++)
+	
+	for (y = EnvNAVXYTHETAVCfg.EnvHeight_c-1; y >= 0; y--)
 		for (x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
 			if (fscanf(fCfg, "%d", &dTemp) != 1) {
 				SBPL_ERROR("ERROR: incorrect format of config file\n");
@@ -1652,8 +1652,7 @@ void EnvironmentNAVXYTHETAV::PrintEnv_Config(FILE* fOut)
 		fprintf(fOut, "end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
 		fprintf(fOut, "environment:\n");
 		
-		/* NON MI CONVINCE, VEDERE COSA SUCCEDE */
-		for (int y = 0; y < EnvNAVXYTHETAVCfg.EnvHeight_c; y++){
+		for (int y = EnvNAVXYTHETAVCfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
 				fprintf(fOut, "%d ", EnvNAVXYTHETAVCfg.Grid2D[x][y]);
 			}
@@ -1678,8 +1677,7 @@ void EnvironmentNAVXYTHETAV::PrintEnv_Config(FILE* fOut)
 		printf("end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
 		printf("environment:\n");
 		
-		/* NON MI CONVINCE, VEDERE COSA SUCCEDE */
-		for (int y = 0; y < EnvNAVXYTHETAVCfg.EnvHeight_c; y++){
+		for (int y = EnvNAVXYTHETAVCfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
 				printf("%d ", EnvNAVXYTHETAVCfg.Grid2D[x][y]);
 			}
@@ -1763,7 +1761,7 @@ bool EnvironmentNAVXYTHETAV::UpdateCost(int x, int y, unsigned char newcost){
 bool EnvironmentNAVXYTHETAV::SetMap(const unsigned char* mapdata){
 	for (int xind = 0; xind < EnvNAVXYTHETAVCfg.EnvWidth_c; xind++) {
 		for (int yind = 0; yind < EnvNAVXYTHETAVCfg.EnvHeight_c; yind++) {
-			EnvNAVXYTHETAVCfg.Grid2D[xind][yind] = mapdata[xind + yind * EnvNAVXYTHETAVCfg.EnvWidth_c];
+			EnvNAVXYTHETAVCfg.Grid2D[xind][EnvNAVXYTHETAVCfg.EnvHeight_c-1-yind] = mapdata[xind + yind * EnvNAVXYTHETAVCfg.EnvWidth_c];
 		}
 	}
 
@@ -2260,7 +2258,7 @@ void EnvironmentNAVXYTHETAV::SetConfiguration(int width, int height, const unsig
 	else {
 		for (int y = 0; y < EnvNAVXYTHETAVCfg.EnvHeight_c; y++) {
 			for (int x = 0; x < EnvNAVXYTHETAVCfg.EnvWidth_c; x++) {
-				EnvNAVXYTHETAVCfg.Grid2D[x][y] = mapdata[x + y * width];
+				EnvNAVXYTHETAVCfg.Grid2D[x][EnvNAVXYTHETAVCfg.EnvHeight_c-1-y] = mapdata[x + y * width];
 			}
 		}
 	}
