@@ -221,7 +221,7 @@ std::string CheckPlannerType(int numOptions, char** argv)
 * 
 * @return 1 if the planner successfully found a solution; 0 otherwise
 *******************************************************************************/
-int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimFilename, bool forwardSearch)
+int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFilename, bool forwardSearch)
 {
 	int bRet = 0;
 	double allocated_time_secs = 300.0; // in seconds
@@ -794,7 +794,7 @@ int main(int argc, char *argv[])
 			plannerRes = planandnavigatexythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
 		}
 		else {
-			plannerRes = planxythetalat(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
+			plannerRes = planxythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
 		}
 
 	return plannerRes == 1 ? MAIN_RESULT_SUCCESS : MAIN_RESULT_FAILURE;

@@ -792,9 +792,11 @@ void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_v_pt_
 
     //call get footprint on the rest of the points
     for (int i = 0; i < poses.size(); i++) {
-        ps.at(i).x=poses.at(i).x;
-		ps.at(i).y=poses.at(i).y;
-		ps.at(i).theta=poses.at(i).theta;
+		sbpl_xy_theta_pt_t tmp;
+		tmp.x=poses.at(i).x;
+		tmp.y=poses.at(i).y;
+		tmp.theta=poses.at(i).theta;
+		ps.push_back(tmp);
     }
 
     get_2d_motion_cells(polygon, ps, cells, res);

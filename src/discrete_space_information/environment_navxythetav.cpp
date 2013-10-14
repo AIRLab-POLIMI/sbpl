@@ -78,8 +78,8 @@ EnvironmentNAVXYTHETAV::~EnvironmentNAVXYTHETAV(){
 	//delete actions
 	if (EnvNAVXYTHETAVCfg.ActionsV != NULL) {
 		for (int ind = 0; ind < (int)EnvNAVXYTHETAVCfg.ActionsV->size(); ind++)
-			delete[] EnvNAVXYTHETAVCfg.ActionsV->at(ind);
-		delete[] EnvNAVXYTHETAVCfg.ActionsV;
+			delete EnvNAVXYTHETAVCfg.ActionsV->at(ind);
+		delete EnvNAVXYTHETAVCfg.ActionsV;
 		EnvNAVXYTHETAVCfg.ActionsV = NULL;
 	}
 	if (EnvNAVXYTHETAVCfg.PredActionsV != NULL) {
@@ -192,6 +192,10 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 	if (strcmp(sTemp1, sTemp) != 0) {
 		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
 		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
+	}
+	if (fscanf(fCfg, "%s", sTemp) != 1) {
+		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
 	
@@ -624,7 +628,8 @@ void EnvironmentNAVXYTHETAV::ComputeReplanningData()
 void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector<SBPL_xythetav_mprimitive>* motionprimitiveV){
 	SBPL_PRINTF("Pre-computing action data using motion primitives for every pair velocity/angle...\n");
 	EnvNAVXYTHETAVCfg.ActionsV = new vector<vector<EnvNAVXYTHETAVAction_t> *>();
-	EnvNAVXYTHETAVCfg.PredActionsV = new vector<EnvNAVXYTHETAVAction_t*> (EnvNAVXYTHETAVCfg.numV*EnvNAVXYTHETAVCfg.NumThetaDirs);
+	EnvNAVXYTHETAVCfg.PredActionsV = new vector<EnvNAVXYTHETAVAction_t*> [EnvNAVXYTHETAVCfg.numV*EnvNAVXYTHETAVCfg.NumThetaDirs];
+	
 	vector<sbpl_2Dcell_t> footprint;
 
 	/*
@@ -636,6 +641,12 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 
 	//EnvNAVXYTHETAVCfg.actionwidth = ((int)motionprimitiveV->size()) / EnvNAVXYTHETALATCfg.NumThetaDirs;
 
+	//Allocate vectors
+	for(int vind = 0; vind < EnvNAVXYTHETAVCfg.numV; vind++)
+		for (int tind = 0; tind < EnvNAVXYTHETAVCfg.NumThetaDirs; tind++){
+			EnvNAVXYTHETAVCfg.ActionsV->push_back(new vector<EnvNAVXYTHETAVAction_t>());
+		}
+	
 	//iterate over source angles
 	int maxnumofactions = 0;
 	for(int vind = 0; vind < EnvNAVXYTHETAVCfg.numV; vind++){
@@ -645,7 +656,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 			//compute current index
 			int vector_index = vind*EnvNAVXYTHETAVCfg.NumThetaDirs+tind;
 			
-			EnvNAVXYTHETAVCfg.ActionsV->at(vector_index) = new vector<EnvNAVXYTHETAVAction_t>();
+			//EnvNAVXYTHETAVCfg.ActionsV->at(vector_index) = new vector<EnvNAVXYTHETAVAction_t>();
 
 			//compute sourcepose
 			sbpl_xy_theta_v_pt_t sourcepose;
@@ -663,26 +674,27 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 
 				aind++;
 				numofactions++;
-
+				EnvNAVXYTHETAVAction_t element_to_add;
+				
 				//action index
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).aind = aind;
+				element_to_add.aind = aind;
 
 				//start angle
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).starttheta = tind;
+				element_to_add.starttheta = tind;
 				
 				//start velocity
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).startv = vind;
+				element_to_add.startv = vind;
 
 				//compute dislocation
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endtheta = motionprimitiveV->at(mind).endcell.theta;
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endv = motionprimitiveV->at(mind).endcell.v;
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).dX = motionprimitiveV->at(mind).endcell.x;
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).dY = motionprimitiveV->at(mind).endcell.y;
+				element_to_add.endtheta = motionprimitiveV->at(mind).endcell.theta;
+				element_to_add.endv = motionprimitiveV->at(mind).endcell.v;
+				element_to_add.dX = motionprimitiveV->at(mind).endcell.x;
+				element_to_add.dY = motionprimitiveV->at(mind).endcell.y;
 
 				//compute and store interm points as well as intersecting cells
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intersectingcellsV.clear();
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV.clear();
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).interm3DcellsV.clear();
+				element_to_add.intersectingcellsV.clear();
+				element_to_add.intermptV.clear();
+				element_to_add.interm3DcellsV.clear();
 
 				sbpl_xy_theta_v_cell_t previnterm3Dcell;
 				previnterm3Dcell.x = 0;
@@ -691,7 +703,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				// Compute all the intersected cells for this action (intermptV and interm3DcellsV)
 				for (int pind = 0; pind < (int)motionprimitiveV->at(mind).intermptV.size(); pind++) {
 					sbpl_xy_theta_v_pt_t intermpt = motionprimitiveV->at(mind).intermptV[pind];
-					EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV.push_back(intermpt);
+					element_to_add.intermptV.push_back(intermpt);
 
 					// also compute the intermediate discrete cells if not there already
 					sbpl_xy_theta_v_pt_t pose;
@@ -705,9 +717,9 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 					intermediate2dCell.y = CONTXY2DISC(pose.y, EnvNAVXYTHETAVCfg.cellsize_m);
 
 					// add unique cells to the list
-					if (EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).interm3DcellsV.size() == 0 || intermediate2dCell.x
+					if (element_to_add.interm3DcellsV.size() == 0 || intermediate2dCell.x
 						!= previnterm3Dcell.x || intermediate2dCell.y != previnterm3Dcell.y) {
-						EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).interm3DcellsV.push_back(intermediate2dCell);
+						element_to_add.interm3DcellsV.push_back(intermediate2dCell);
 					}
 
 					previnterm3Dcell = intermediate2dCell;
@@ -715,18 +727,19 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 
 				//compute linear and angular time
 				double linear_distance = 0;
-				double medium_velocity = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[0].v;
-				for (unsigned int i = 1; EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV.size(); i++) {
-					double x0 = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[i - 1].x;
-					double y0 = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[i - 1].y;
-					double x1 = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[i].x;
-					double y1 = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[i].y;
+				double medium_velocity = element_to_add.intermptV[0].v;
+				for (unsigned int i = 1; i<element_to_add.intermptV.size(); i++) {
+					double x0 = element_to_add.intermptV[i - 1].x;
+					double y0 = element_to_add.intermptV[i - 1].y;
+					double x1 = element_to_add.intermptV[i].x;
+					double y1 = element_to_add.intermptV[i].y;
 					double dx = x1 - x0;
 					double dy = y1 - y0;
 					linear_distance += sqrt(dx * dx + dy * dy);
-					medium_velocity += EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV[i].v;
+					medium_velocity += fabs(element_to_add.intermptV[i].v);
 				}
-				medium_velocity /= (int)EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intermptV.size();
+				
+				medium_velocity /= (int)element_to_add.intermptV.size();
 				double linear_time = linear_distance / medium_velocity;
 				
 				/*
@@ -741,16 +754,17 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				*/
 				
 				//make the cost the max of the two times
-				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				element_to_add.cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				//if(element_to_add.cost <= 0)
+					//printf("%d\n",element_to_add.cost);
+				
 						//(int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * max(linear_time, angular_time)));
 				//use any additional cost multiplier
 				//EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
 
 				//now compute the intersecting cells for this motion (including ignoring the source footprint)
-				get_2d_motion_cells(EnvNAVXYTHETAVCfg.FootprintPolygon, motionprimitiveV->at(mind).intermptV,
-									&EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intersectingcellsV,
-									EnvNAVXYTHETAVCfg.cellsize_m);
-
+				get_2d_motion_cells(EnvNAVXYTHETAVCfg.FootprintPolygon, motionprimitiveV->at(mind).intermptV, &element_to_add.intersectingcellsV, EnvNAVXYTHETAVCfg.cellsize_m);
+/*
 	#if DEBUG
 				SBPL_FPRINTF(fDeb,
 							"action action_index=%2d aind=%2d: dX=%3d dY=%3d endtheta=%3d (%6.2f degs -> %6.2f degs) endv=%3d"
@@ -767,10 +781,11 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 							(int)EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).interm3DcellsV.size(),
 							(int)EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).intersectingcellsV.size());
 	#endif
-
+*/
 				//add to the list of backward actions
-				int postheta = (EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endtheta > 0)?EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endtheta:EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endtheta+EnvNAVXYTHETAVCfg.NumThetaDirs;
-				int targetindex = EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind).endv*EnvNAVXYTHETAVCfg.NumThetaDirs+postheta;
+				int postheta = (element_to_add.endtheta >= 0)?element_to_add.endtheta:element_to_add.endtheta+EnvNAVXYTHETAVCfg.NumThetaDirs;
+				int targetindex = element_to_add.endv*EnvNAVXYTHETAVCfg.NumThetaDirs+postheta;
+				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->push_back(element_to_add);
 				EnvNAVXYTHETAVCfg.PredActionsV[targetindex].push_back(&(EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind)));
 			}
 
@@ -787,7 +802,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 		throw new SBPL_Exception();
 	}
 	*/
-
+	
 	//now compute replanning data
 	ComputeReplanningData();
 
@@ -1000,7 +1015,7 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 	if (fscanf(fIn, "%d", &pMotPrim->motprimID) != 1) return false;
 
 	//read in start cell
-	strcpy(sExpected, "startpose_disc:");
+	strcpy(sExpected, "start_pose_disc:");
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
 	if (strcmp(sTemp, sExpected) != 0) {
 		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
@@ -1026,7 +1041,7 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 	pMotPrim->start_v_disc = dTemp;
 
 	//read in end cell
-	strcpy(sExpected, "endpose_disc:");
+	strcpy(sExpected, "end_pose_disc:");
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
 	if (strcmp(sTemp, sExpected) != 0) {
 		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
@@ -2193,7 +2208,7 @@ int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTh
 	maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX][sourceY]);
 	int currentmaxcost =
 			(int)__max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
-
+			
 	return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
 }
 

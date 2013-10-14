@@ -57,7 +57,7 @@ typedef struct
 	int dY;
 	int endtheta;
 	int endv;
-	unsigned int cost;
+	int cost;
 	std::vector<sbpl_2Dcell_t> intersectingcellsV;
 	std::vector<sbpl_xy_theta_v_pt_t> intermptV;
 	std::vector<sbpl_xy_theta_v_cell_t> interm3DcellsV;
@@ -134,7 +134,7 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	
 	/* SEE IF NEEDED A PREDECESSOR ARRAY */
 	//PredActionsV[i] - vector of pointers to the actions that result in a state with theta+v*NUMTHETA = i
-	std::vector<EnvNAVXYTHETAVAction_t*> *PredActionsV;
+	std::vector<EnvNAVXYTHETAVAction_t*>* PredActionsV;
 
 	//int actionwidth; //number of motion primitives
 	std::vector<SBPL_xythetav_mprimitive> mprimV;
