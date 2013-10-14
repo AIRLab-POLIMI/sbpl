@@ -385,7 +385,7 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
-	EnvNAVXYTHETAVCfg.StartV = ContV2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.velocities);
+	EnvNAVXYTHETAVCfg.EndV = ContV2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.velocities);
 
 	if (EnvNAVXYTHETAVCfg.EndX_c < 0 || EnvNAVXYTHETAVCfg.EndX_c >= EnvNAVXYTHETAVCfg.EnvWidth_c) {
 		SBPL_ERROR("ERROR: illegal end coordinates\n");
@@ -728,6 +728,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				//compute linear and angular time
 				double linear_distance = 0;
 				double medium_velocity = element_to_add.intermptV[0].v;
+				//double xmax=element_to_add.intermptV[0].x, xmin=element_to_add.intermptV[0].x, ymax=element_to_add.intermptV[0].y, ymin=element_to_add.intermptV[0].y;
 				for (unsigned int i = 1; i<element_to_add.intermptV.size(); i++) {
 					double x0 = element_to_add.intermptV[i - 1].x;
 					double y0 = element_to_add.intermptV[i - 1].y;
@@ -737,10 +738,22 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 					double dy = y1 - y0;
 					linear_distance += sqrt(dx * dx + dy * dy);
 					medium_velocity += fabs(element_to_add.intermptV[i].v);
+					
+					/*if(element_to_add.intermptV[i].x > xmax)
+						xmax = element_to_add.intermptV[i].x;
+					
+					if(element_to_add.intermptV[i].x < xmin)
+						xmin = element_to_add.intermptV[i].x;
+					
+					if(element_to_add.intermptV[i].y > ymax)
+						ymax = element_to_add.intermptV[i].y;
+					
+					if(element_to_add.intermptV[i].y < ymin)
+						ymin = element_to_add.intermptV[i].y;*/
 				}
 				
 				medium_velocity /= (int)element_to_add.intermptV.size();
-				double linear_time = linear_distance / medium_velocity;
+				//double linear_time = linear_distance / medium_velocity;
 				
 				/*
 				* Have some sense in ackermann vehicle?
@@ -754,7 +767,10 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				*/
 				
 				//make the cost the max of the two times
-				element_to_add.cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				element_to_add.cost = linear_distance * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				//element_to_add.cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				//element_to_add.cost = ((xmax-xmin)*(xmax-xmin)+(ymax-ymin)*(ymax-ymin))*1000;
+				
 				//if(element_to_add.cost <= 0)
 					//printf("%d\n",element_to_add.cost);
 				
