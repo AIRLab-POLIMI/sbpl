@@ -32,11 +32,10 @@ class CMDPSTATE;
 class MDPConfig;
 class SBPL2DGridSearch;
 
-/* 
-* Missing the defintion of action. In xytheta is used also an heuristic
-* that execute 2D search in environment. Now, i use euclidean distance
-* after i will change it.
-*/
+typedef struct{
+	int vector_index;
+	int aind;
+} EnvNAVXYTHETAVActionIndex_t;
 
 typedef struct
 {
@@ -134,7 +133,7 @@ typedef struct ENV_NAVXYTHETAV_CONFIG
 	
 	/* SEE IF NEEDED A PREDECESSOR ARRAY */
 	//PredActionsV[i] - vector of pointers to the actions that result in a state with theta+v*NUMTHETA = i
-	std::vector<EnvNAVXYTHETAVAction_t*>* PredActionsV;
+	std::vector<EnvNAVXYTHETAVActionIndex_t> *PredActionsV;
 
 	//int actionwidth; //number of motion primitives
 	std::vector<SBPL_xythetav_mprimitive> mprimV;

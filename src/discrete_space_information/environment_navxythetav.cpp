@@ -628,7 +628,7 @@ void EnvironmentNAVXYTHETAV::ComputeReplanningData()
 void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector<SBPL_xythetav_mprimitive>* motionprimitiveV){
 	SBPL_PRINTF("Pre-computing action data using motion primitives for every pair velocity/angle...\n");
 	EnvNAVXYTHETAVCfg.ActionsV = new vector<vector<EnvNAVXYTHETAVAction_t> *>();
-	EnvNAVXYTHETAVCfg.PredActionsV = new vector<EnvNAVXYTHETAVAction_t*> [EnvNAVXYTHETAVCfg.numV*EnvNAVXYTHETAVCfg.NumThetaDirs];
+	EnvNAVXYTHETAVCfg.PredActionsV = new vector<EnvNAVXYTHETAVActionIndex_t> [EnvNAVXYTHETAVCfg.numV*EnvNAVXYTHETAVCfg.NumThetaDirs];
 	
 	vector<sbpl_2Dcell_t> footprint;
 
@@ -801,8 +801,11 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				//add to the list of backward actions
 				int postheta = (element_to_add.endtheta >= 0)?element_to_add.endtheta:element_to_add.endtheta+EnvNAVXYTHETAVCfg.NumThetaDirs;
 				int targetindex = element_to_add.endv*EnvNAVXYTHETAVCfg.NumThetaDirs+postheta;
+				EnvNAVXYTHETAVActionIndex_t idx;
+				idx.vector_index = vector_index;
+				idx.aind = aind;
 				EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->push_back(element_to_add);
-				EnvNAVXYTHETAVCfg.PredActionsV[targetindex].push_back(&(EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->at(aind)));
+				EnvNAVXYTHETAVCfg.PredActionsV[targetindex].push_back(idx);
 			}
 
 			if (maxnumofactions < numofactions) maxnumofactions = numofactions;
@@ -1594,18 +1597,19 @@ void EnvironmentNAVXYTHETAV::GetPreds(int TargetStateID, vector<int>* PredIDV, v
 
 	//get X, Y for the state
 	EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[TargetStateID];
+	int targetindex = (unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta;
 
 	//clear the preds array
 	PredIDV->clear();
 	CostV->clear();
-	PredIDV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size());
-	CostV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size());
+	PredIDV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[targetindex].size());
+	CostV->reserve(EnvNAVXYTHETAVCfg.PredActionsV[targetindex].size());
 
 	//iterate through actions
-	vector<EnvNAVXYTHETAVAction_t*>* actionsV = &EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta];
-	for (aind = 0; aind < (int)EnvNAVXYTHETAVCfg.PredActionsV[(unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta].size(); aind++) {
+	vector<EnvNAVXYTHETAVActionIndex_t>* actionsV = &EnvNAVXYTHETAVCfg.PredActionsV[targetindex];
+	for (aind = 0; aind < (int)actionsV->size(); aind++) {
 
-		EnvNAVXYTHETAVAction_t* nav4daction = actionsV->at(aind);
+		EnvNAVXYTHETAVAction_t* nav4daction = &EnvNAVXYTHETAVCfg.ActionsV->at(actionsV->at(aind).vector_index)->at(actionsV->at(aind).aind);
 
 		int predX = HashEntry->x - nav4daction->dX;
 		int predY = HashEntry->y - nav4daction->dY;
