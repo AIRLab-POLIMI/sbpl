@@ -231,11 +231,10 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	bool bforwardsearch = forwardSearch;
 
 	// set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
-	// I USE THE PEREIMETERS ALREADY USED, VERY VERY SMALL
 	vector<sbpl_2Dpt_t> perimeterptsV;
 	sbpl_2Dpt_t pt_m;
-	double halfwidth = 0.01; //0.3;
-	double halflength = 0.01; //0.45;
+	double halfwidth = 1.0; //0.3;
+	double halflength = 1.0; //0.45;
 	pt_m.x = -halflength;
 	pt_m.y = -halfwidth;
 	perimeterptsV.push_back(pt_m);
@@ -250,7 +249,7 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	perimeterptsV.push_back(pt_m);
 
 	// clear the footprint
-	perimeterptsV.clear();
+	//perimeterptsV.clear();
 
 	// Initialize Environment (should be called before initializing anything else)
 	EnvironmentNAVXYTHETAV environment_navxythetav;

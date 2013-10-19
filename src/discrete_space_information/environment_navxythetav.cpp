@@ -424,6 +424,16 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 			}
 			EnvNAVXYTHETAVCfg.Grid2D[x][y] = dTemp;
 		}
+	
+	if(!IsValidConfiguration(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.StartV)){
+		SBPL_ERROR("ERROR: invalid start state\n");
+		throw new SBPL_Exception();
+	}
+	
+	if(!IsValidConfiguration(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.EndV)){
+		SBPL_ERROR("ERROR: invalid end state\n");
+		throw new SBPL_Exception();
+	}
 }
 
 /*
