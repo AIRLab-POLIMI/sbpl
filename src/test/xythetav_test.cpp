@@ -281,7 +281,9 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	case PLANNER_TYPE_RSTAR:
 		//VIEW WHY
 		printf("Invalid configuration: xythetav environment does not support rstar planner...\n");
-		return 0;
+		//return 0;
+		planner = new RSTARPlanner(&environment_navxythetav, bforwardsearch);
+		break;
 	case PLANNER_TYPE_ANASTAR:
 		printf("Initializing anaPlanner...\n");
 		planner = new anaPlanner(&environment_navxythetav, bforwardsearch);
