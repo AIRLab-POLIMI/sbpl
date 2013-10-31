@@ -370,7 +370,7 @@ int get_next_point(bresenham_param_t *params)
 
 //converts discretized version of angle into continuous (radians)
 //maps 0->0, 1->delta, 2->2*delta, ...
-double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS)
+/*double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS)
 {
     double thetaBinSize = 2.0 * PI_CONST / NUMOFANGLEVALS;
     return nTheta * thetaBinSize;
@@ -382,6 +382,66 @@ int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS)
 {
     double thetaBinSize = 2.0 * PI_CONST / NUMOFANGLEVALS;
     return (int)(normalizeAngle(fTheta + thetaBinSize / 2.0) / (2.0 * PI_CONST) * (NUMOFANGLEVALS));
+}*/
+
+double round_two_decimal(double val){
+	return round(val*100)/100;
+}
+
+//converts discretized version of angle into continuous (radians)
+//maps 0->0, 1->delta, 2->2*delta, ...
+double DiscTheta2Cont(int nTheta, int numtheta)
+{
+    vector<double> theta_cont;
+	
+	theta_cont.push_back(atan(0));
+	theta_cont.push_back(atan(1.0/3.0));
+	theta_cont.push_back(atan(1));
+	theta_cont.push_back(atan(3));
+	
+	for(int i=1;i<=3;i++){
+		for(int j=0;j<4;j++){
+			theta_cont.push_back(theta_cont.at(j)+PI_CONST/2*i);
+		}
+	}
+	
+	while(nTheta >= numtheta)
+		nTheta-=numtheta;
+	
+	while(nTheta < 0)
+		nTheta+=numtheta;
+	
+	return theta_cont.at(nTheta);
+}
+
+//converts continuous (radians) version of angle into discrete
+//maps 0->0, [delta/2, 3/2*delta)->1, [3/2*delta, 5/2*delta)->2,...
+int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS)
+{
+    vector<double> all_theta_cont;
+	
+	all_theta_cont.push_back(atan(0));
+	all_theta_cont.push_back(atan(1.0/3.0));
+	all_theta_cont.push_back(atan(1));
+	all_theta_cont.push_back(atan(3.0));
+	
+	for(int i=1;i<=3;i++){
+		for(int j=0;j<4;j++){
+			all_theta_cont.push_back(all_theta_cont.at(j)+PI_CONST/2*i);
+		}
+	}
+	
+	while(fTheta < 0)
+		fTheta += 2*PI_CONST;
+	
+	while(fTheta >= 2*PI_CONST)
+		fTheta -= 2*PI_CONST;
+	
+	int i=0;
+	
+	for(i=0;i<all_theta_cont.size() && round_two_decimal(all_theta_cont.at(i)) != round_two_decimal(fTheta);i++);
+	
+	return i;
 }
 
 int ContV2Disc(double fV, vector<double> velocities){

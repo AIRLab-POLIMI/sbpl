@@ -50,8 +50,10 @@
 
 #define CONTXY2DISC(X, CELLSIZE) (((X)>=0)?((int)((X)/(CELLSIZE))):((int)((X)/(CELLSIZE))-1))
 #define DISCXY2CONT(X, CELLSIZE) ((X)*(CELLSIZE) + (CELLSIZE)/2.0)
-
+/*
 #define PI_CONST 3.141592653589793238462643383279502884
+*/
+#define PI_CONST 3.14
 
 #define UNKNOWN_COST 1000000
 
@@ -315,6 +317,13 @@ void get_current_point(bresenham_param_t* params, int* x, int* y);
  *        path following moves to the next point
  */
 int get_next_point(bresenham_param_t* params);
+
+/**
+ * \brief round a number to 2 decimal values
+ * \param val double value to round
+ * \return rounded value
+ */
+double round_two_decimal(double val);
 
 /**
  * \brief converts discretized version of angle into continuous (radians)
