@@ -436,9 +436,6 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 	}
 }
 
-/*
-* SAME AS ABOVE FOR UNSIGNED
-*/
 EnvNAVXYTHETAVHashEntry_t* EnvironmentNAVXYTHETAV::GetHashEntry(unsigned int x, unsigned int y, unsigned int theta, unsigned int v)
 {
 	//clock_t currenttime = clock();
@@ -472,9 +469,6 @@ EnvNAVXYTHETAVHashEntry_t* EnvironmentNAVXYTHETAV::GetHashEntry(unsigned int x, 
 	return NULL;
 }
 
-/*
-* SAME AS ABOVE FOR UNSIGNED
-*/
 EnvNAVXYTHETAVHashEntry_t* EnvironmentNAVXYTHETAV::CreateNewHashEntry(unsigned int x, unsigned int y, unsigned int theta,
 													unsigned int v)
 {
@@ -778,6 +772,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				
 				//make the cost the max of the two times
 				element_to_add.cost = NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				//element_to_add.cost = NAVXYTHETAV_COSTMULT_MTOMM*(linear_distance/medium_velocity);
 				//double linear_distance_action = element_to_add.dX*element_to_add.dX + element_to_add.dY*element_to_add.dY;
 				//element_to_add.cost = (int)((linear_distance/linear_distance_action) * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult);
 				//element_to_add.cost = linear_time * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
@@ -1221,7 +1216,9 @@ void EnvironmentNAVXYTHETAV::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.EndX_c,
 																				EnvNAVXYTHETAVCfg.EndY_c)/NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
-
+		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
+					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.EndX_c,
+																				EnvNAVXYTHETAVCfg.EndY_c)));*/
 	}
 
 	if (bNeedtoRecomputeGoalHeuristics && bGoalHeuristics) {
@@ -1233,6 +1230,10 @@ void EnvironmentNAVXYTHETAV::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.StartX_c,
 																				EnvNAVXYTHETAVCfg.StartY_c)/NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
+		
+		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
+					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.StartX_c,
+																				EnvNAVXYTHETAVCfg.StartY_c)));*/
 	}
 }
 
@@ -1415,6 +1416,7 @@ int EnvironmentNAVXYTHETAV::GetFromToHeuristic(int FromStateID, int ToStateID)
 	//TODO - check if one of the gridsearches already computed and then use it.
 
 	return (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->x, FromHashEntry->y, ToHashEntry->x, ToHashEntry->y)/NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	//return (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->x, FromHashEntry->y, ToHashEntry->x, ToHashEntry->y));
 }
 
 int EnvironmentNAVXYTHETAV::GetGoalHeuristic(int stateID)
@@ -1439,6 +1441,7 @@ int EnvironmentNAVXYTHETAV::GetGoalHeuristic(int stateID)
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
 	return (int)(((double)__max(h2D, hEuclid)) / NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	//return (int)(((double)__max(h2D, hEuclid)));
 }
 
 int EnvironmentNAVXYTHETAV::GetStartHeuristic(int stateID)
@@ -1456,13 +1459,14 @@ int EnvironmentNAVXYTHETAV::GetStartHeuristic(int stateID)
 #endif
 
 	EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[stateID];
-	int h2D = grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(HashEntry->y, HashEntry->x);
+	int h2D = grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(HashEntry->x, HashEntry->y);
 	int hEuclid = (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(EnvNAVXYTHETAVCfg.StartX_c,
 																		EnvNAVXYTHETAVCfg.StartY_c, HashEntry->x,
 																		HashEntry->y));
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
 	return (int)(((double)__max(h2D, hEuclid)) / NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	//return (int)(((double)__max(h2D, hEuclid)));
 }
 
 void EnvironmentNAVXYTHETAV::SetAllActionsandAllOutcomes(CMDPSTATE* state){
@@ -1979,6 +1983,8 @@ bool EnvironmentNAVXYTHETAV::PoseDiscToCont(int ix, int iy, int ith, int iv, dou
 	px = DISCXY2CONT(ix, EnvNAVXYTHETAVCfg.cellsize_m);
 	py = DISCXY2CONT(iy, EnvNAVXYTHETAVCfg.cellsize_m);
 	pth = normalizeAngle(DiscTheta2Cont(ith, EnvNAVXYTHETAVCfg.NumThetaDirs));
+	pv = DiscV2Cont(iv, EnvNAVXYTHETAVCfg.velocities);
+	
 	return (ith >= 0) && (ith < EnvNAVXYTHETAVCfg.NumThetaDirs) && (ix >= 0 && ix < EnvNAVXYTHETAVCfg.EnvWidth_c && iy >= 0 && iy < EnvNAVXYTHETAVCfg.EnvHeight_c) && (iv >= 0) && (iv < EnvNAVXYTHETAVCfg.numV);
 }
 

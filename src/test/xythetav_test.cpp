@@ -224,7 +224,7 @@ std::string CheckPlannerType(int numOptions, char** argv)
 int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFilename, bool forwardSearch)
 {
 	int bRet = 0;
-	double allocated_time_secs = 300.0; // in seconds
+	double allocated_time_secs = 1200.0; // in seconds
 	double initialEpsilon = 3.0;
 	MDPConfig MDPCfg;
 	bool bsearchuntilfirstsolution = false;
