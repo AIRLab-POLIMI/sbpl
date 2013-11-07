@@ -319,13 +319,6 @@ void get_current_point(bresenham_param_t* params, int* x, int* y);
 int get_next_point(bresenham_param_t* params);
 
 /**
- * \brief round a number to 2 decimal values
- * \param val double value to round
- * \return rounded value
- */
-double round_two_decimal(double val);
-
-/**
  * \brief converts discretized version of angle into continuous (radians)
  *
  * \note maps 0->0, 1->delta, 2->2*delta, ...
@@ -338,6 +331,27 @@ double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS);
  * \note maps 0->0, [delta/2, 3/2*delta)->1, [3/2*delta, 5/2*delta)->2,...
  */
 int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS);
+
+/**
+ * \brief round a number to 2 decimal values
+ * \param val double value to round
+ * \return rounded value
+ */
+double round_two_decimal(double val);
+
+/**
+ * \brief converts discretized version of angle into continuous (radians)
+ *
+ * \note maps 0->0, 1->delta, 2->2*delta, ...
+ */
+double DiscTheta2ContNotUnif(int nTheta, int NUMOFANGLEVALS);
+
+/**
+ * \brief converts continuous (radians) version of angle into discrete
+ *
+ * \note maps 0->0, [delta/2, 3/2*delta)->1, [3/2*delta, 5/2*delta)->2,...
+ */
+int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS);
 
 /**
  * \brief converts continuous version of velocity into discrete

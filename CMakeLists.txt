@@ -18,8 +18,10 @@ add_library(sbpl SHARED
   src/planners/viplanner.cpp
   src/planners/ppcpplanner.cpp
   src/planners/ANAplanner.cpp
+  src/planners/ANAPlannerDouble.cpp
   src/planners/rstarplanner.cpp
   src/utils/heap.cpp
+  src/utils/heapdouble.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp
   src/utils/2Dgridsearch.cpp	

@@ -467,7 +467,7 @@ int plan2duu(PlannerType plannerType, char* envCfgFilename)
 int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimFilename, bool forwardSearch)
 {
     int bRet = 0;
-    double allocated_time_secs = 300.0; // in seconds
+    double allocated_time_secs = 1200.0; // in seconds
     double initialEpsilon = 3.0;
     MDPConfig MDPCfg;
     bool bsearchuntilfirstsolution = false;
@@ -1468,7 +1468,7 @@ int planandnavigatexythetalat(PlannerType plannerType, char* envCfgFilename, cha
 int planrobarm(PlannerType plannerType, char* envCfgFilename, bool forwardSearch)
 {
     int bRet = 0;
-    double allocated_time_secs = 5.0; //in seconds
+    double allocated_time_secs = 300.0; //in seconds
     MDPConfig MDPCfg;
     bool bforwardsearch = forwardSearch;
 

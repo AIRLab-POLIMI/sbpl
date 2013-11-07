@@ -337,7 +337,7 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
-	EnvNAVXYTHETAVCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
+	EnvNAVXYTHETAVCfg.StartTheta = ContTheta2DiscNotUnif(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
@@ -380,7 +380,7 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
-	EnvNAVXYTHETAVCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
+	EnvNAVXYTHETAVCfg.EndTheta = ContTheta2DiscNotUnif(atof(sTemp), EnvNAVXYTHETAVCfg.NumThetaDirs);
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
@@ -666,7 +666,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 			sbpl_xy_theta_v_pt_t sourcepose;
 			sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
 			sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
-			sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETAVCfg.NumThetaDirs);
+			sourcepose.theta = DiscTheta2ContNotUnif(tind, EnvNAVXYTHETAVCfg.NumThetaDirs);
 			sourcepose.v = DiscV2Cont(vind, EnvNAVXYTHETAVCfg.velocities);
 
 			//iterate over motion primitives
@@ -1110,7 +1110,7 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 	sbpl_xy_theta_v_pt_t sourcepose;
 	sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
 	sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETAVCfg.cellsize_m);
-	sourcepose.theta = DiscTheta2Cont(pMotPrim->start_theta_disc, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	sourcepose.theta = DiscTheta2ContNotUnif(pMotPrim->start_theta_disc, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	sourcepose.v = DiscV2Cont(pMotPrim->start_v_disc, EnvNAVXYTHETAVCfg.velocities);
 	double mp_endx_m = sourcepose.x + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].x;
 	double mp_endy_m = sourcepose.y + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].y;
@@ -1118,7 +1118,7 @@ bool EnvironmentNAVXYTHETAV::ReadSingleMotionPrimitive(SBPL_xythetav_mprimitive*
 	double mp_endv_ms = pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].v;
 	int endx_disc = CONTXY2DISC(mp_endx_m, EnvNAVXYTHETAVCfg.cellsize_m);
 	int endy_disc = CONTXY2DISC(mp_endy_m, EnvNAVXYTHETAVCfg.cellsize_m);
-	int endtheta_disc = ContTheta2Disc(mp_endtheta_rad, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	int endtheta_disc = ContTheta2DiscNotUnif(mp_endtheta_rad, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	int endv_disc = ContV2Disc(mp_endv_ms, EnvNAVXYTHETAVCfg.velocities);
 	if (endx_disc != pMotPrim->endcell.x || endy_disc != pMotPrim->endcell.y || endtheta_disc != pMotPrim->endcell.theta || endv_disc != pMotPrim->endcell.v) {
 		SBPL_ERROR( "ERROR: incorrect primitive %d with startangle=%d and startv=%d "
@@ -1699,8 +1699,8 @@ void EnvironmentNAVXYTHETAV::PrintEnv_Config(FILE* fOut)
 		fprintf(fOut, "cost_possibly_circumscribed_thresh: %d\n", EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh);
 		fprintf(fOut, "cellsize(meters): %f\n", EnvNAVXYTHETAVCfg.cellsize_m);
 		fprintf(fOut, "cost_possibly_circumscribed_thresh: %d\n", EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh);
-		fprintf(fOut, "start(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.StartV, EnvNAVXYTHETAVCfg.velocities));
-		fprintf(fOut, "end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
+		fprintf(fOut, "start(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.StartV, EnvNAVXYTHETAVCfg.velocities));
+		fprintf(fOut, "end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
 		fprintf(fOut, "environment:\n");
 		
 		for (int y = EnvNAVXYTHETAVCfg.EnvHeight_c-1; y >= 0; y--){
@@ -1724,8 +1724,8 @@ void EnvironmentNAVXYTHETAV::PrintEnv_Config(FILE* fOut)
 		printf("cost_possibly_circumscribed_thresh: %d\n", EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh);
 		printf("cellsize(meters): %f\n", EnvNAVXYTHETAVCfg.cellsize_m);
 		printf("cost_possibly_circumscribed_thresh: %d\n", EnvNAVXYTHETAVCfg.cost_possibly_circumscribed_thresh);
-		printf("start(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.StartV, EnvNAVXYTHETAVCfg.velocities));
-		printf("end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2Cont(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
+		printf("start(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.StartV, EnvNAVXYTHETAVCfg.velocities));
+		printf("end(meters,rads,m/s): %f %f %f %f\n", DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m), DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m), DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs), DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities));
 		printf("environment:\n");
 		
 		for (int y = EnvNAVXYTHETAVCfg.EnvHeight_c-1; y >= 0; y--){
@@ -1771,8 +1771,8 @@ bool EnvironmentNAVXYTHETAV::InitializeEnv(int width, int height, int numthetadi
 	//TODO - need to set the tolerance as well
 
 	SetConfiguration(width, height, mapdata, CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m),
-					ContTheta2Disc(starttheta, EnvNAVXYTHETAVCfg.NumThetaDirs), ContV2Disc(startv, EnvNAVXYTHETAVCfg.velocities),
-					CONTXY2DISC(goalx, cellsize_m), CONTXY2DISC(goaly, cellsize_m), ContTheta2Disc(goaltheta, EnvNAVXYTHETAVCfg.NumThetaDirs),
+					ContTheta2DiscNotUnif(starttheta, EnvNAVXYTHETAVCfg.NumThetaDirs), ContV2Disc(startv, EnvNAVXYTHETAVCfg.velocities),
+					CONTXY2DISC(goalx, cellsize_m), CONTXY2DISC(goaly, cellsize_m), ContTheta2DiscNotUnif(goaltheta, EnvNAVXYTHETAVCfg.NumThetaDirs),
 					ContV2Disc(goalv, EnvNAVXYTHETAVCfg.velocities), cellsize_m, perimeterptsV);
 
 	if (sMotPrimFile != NULL) {
@@ -1896,7 +1896,7 @@ bool EnvironmentNAVXYTHETAV::IsValidConfiguration(int x, int y, int theta, int v
 	//compute continuous pose
 	pose.x = DISCXY2CONT(x, EnvNAVXYTHETAVCfg.cellsize_m);
 	pose.y = DISCXY2CONT(y, EnvNAVXYTHETAVCfg.cellsize_m);
-	pose.theta = DiscTheta2Cont(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	pose.theta = DiscTheta2ContNotUnif(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	pose.v = DiscV2Cont(v, EnvNAVXYTHETAVCfg.velocities);
 
 	//compute footprint cells
@@ -1938,11 +1938,11 @@ void EnvironmentNAVXYTHETAV::GetEnvParams(int *size_x, int *size_y, int * numthe
 	
 	*startx = DISCXY2CONT(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.cellsize_m);
 	*starty = DISCXY2CONT(EnvNAVXYTHETAVCfg.StartY_c, EnvNAVXYTHETAVCfg.cellsize_m);
-	*starttheta = DiscTheta2Cont(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	*starttheta = DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.StartTheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	*startv = DiscV2Cont(EnvNAVXYTHETAVCfg.StartV, EnvNAVXYTHETAVCfg.velocities);
 	*goalx = DISCXY2CONT(EnvNAVXYTHETAVCfg.EndX_c, EnvNAVXYTHETAVCfg.cellsize_m);
 	*goaly = DISCXY2CONT(EnvNAVXYTHETAVCfg.EndY_c, EnvNAVXYTHETAVCfg.cellsize_m);
-	*goaltheta = DiscTheta2Cont(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	*goaltheta = DiscTheta2ContNotUnif(EnvNAVXYTHETAVCfg.EndTheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	*goalv = DiscV2Cont(EnvNAVXYTHETAVCfg.EndV, EnvNAVXYTHETAVCfg.velocities);
 
 	*cellsize_m = EnvNAVXYTHETAVCfg.cellsize_m;
@@ -1973,7 +1973,7 @@ bool EnvironmentNAVXYTHETAV::IsWithinMapCell(int x, int y){
 bool EnvironmentNAVXYTHETAV::PoseContToDisc(double px, double py, double pth, double pv, int &ix, int &iy, int &ith, int &iv) const{
 	ix = CONTXY2DISC(px, EnvNAVXYTHETAVCfg.cellsize_m);
 	iy = CONTXY2DISC(py, EnvNAVXYTHETAVCfg.cellsize_m);
-	ith = ContTheta2Disc(pth, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	ith = ContTheta2DiscNotUnif(pth, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	iv = ContV2Disc(pv, EnvNAVXYTHETAVCfg.velocities);
 	
 	return (pth >= -2 * PI_CONST) && (pth <= 2 * PI_CONST) && (ix >= 0 && ix < EnvNAVXYTHETAVCfg.EnvWidth_c && iy >= 0 && iy < EnvNAVXYTHETAVCfg.EnvHeight_c) && (iv >= 0) && (iv < EnvNAVXYTHETAVCfg.numV);
@@ -1982,7 +1982,7 @@ bool EnvironmentNAVXYTHETAV::PoseContToDisc(double px, double py, double pth, do
 bool EnvironmentNAVXYTHETAV::PoseDiscToCont(int ix, int iy, int ith, int iv, double &px, double &py, double &pth, double &pv) const{
 	px = DISCXY2CONT(ix, EnvNAVXYTHETAVCfg.cellsize_m);
 	py = DISCXY2CONT(iy, EnvNAVXYTHETAVCfg.cellsize_m);
-	pth = normalizeAngle(DiscTheta2Cont(ith, EnvNAVXYTHETAVCfg.NumThetaDirs));
+	pth = normalizeAngle(DiscTheta2ContNotUnif(ith, EnvNAVXYTHETAVCfg.NumThetaDirs));
 	pv = DiscV2Cont(iv, EnvNAVXYTHETAVCfg.velocities);
 	
 	return (ith >= 0) && (ith < EnvNAVXYTHETAVCfg.NumThetaDirs) && (ix >= 0 && ix < EnvNAVXYTHETAVCfg.EnvWidth_c && iy >= 0 && iy < EnvNAVXYTHETAVCfg.EnvHeight_c) && (iv >= 0) && (iv < EnvNAVXYTHETAVCfg.numV);
@@ -1991,7 +1991,7 @@ bool EnvironmentNAVXYTHETAV::PoseDiscToCont(int ix, int iy, int ith, int iv, dou
 int EnvironmentNAVXYTHETAV::SetStart(double x, double y, double theta, double v){
 	int startx = CONTXY2DISC(x, EnvNAVXYTHETAVCfg.cellsize_m);
 	int starty = CONTXY2DISC(y, EnvNAVXYTHETAVCfg.cellsize_m);
-	int starttheta = ContTheta2Disc(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	int starttheta = ContTheta2DiscNotUnif(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	int startv = ContV2Disc(v, EnvNAVXYTHETAVCfg.velocities);
 
 	if (!IsWithinMapCell(startx, starty)) {
@@ -2030,7 +2030,7 @@ int EnvironmentNAVXYTHETAV::SetStart(double x, double y, double theta, double v)
 int EnvironmentNAVXYTHETAV::SetGoal(double x, double y, double theta, double v){
 	int goalx = CONTXY2DISC(x, EnvNAVXYTHETAVCfg.cellsize_m);
 	int goaly = CONTXY2DISC(y, EnvNAVXYTHETAVCfg.cellsize_m);
-	int goaltheta = ContTheta2Disc(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
+	int goaltheta = ContTheta2DiscNotUnif(theta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 	int goalv = ContV2Disc(v, EnvNAVXYTHETAVCfg.velocities);
 
 	SBPL_PRINTF("env: setting start to %.3f %.3f %.3f %.3f (%d %d %d %d)\n", x, y, theta, v, goalx, goaly, goaltheta, goalv);
@@ -2161,7 +2161,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 			int ny = CONTXY2DISC(intermpt.y, EnvNAVXYTHETAVCfg.cellsize_m);
 			SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f %.3f (%d %d %d %d cost=%d) ",
 				intermpt.x, intermpt.y, intermpt.theta, intermpt.v,
-				nx, ny, ContTheta2Disc(intermpt.theta, EnvNAVXYTHETALATCfg.NumThetaDirs),
+				nx, ny, ContTheta2DiscNotUnif(intermpt.theta, EnvNAVXYTHETALATCfg.NumThetaDirs),
 				ConvV2Disc(intermpt.v, EnvNAVXYTHETAVCfg.velocities), EnvNAVXYTHETALATCfg.Grid2D[nx][ny]);
 			if(ipind == 0) SBPL_FPRINTF(fDeb, "first (heur=%d)\n", GetStartHeuristic(sourceID));
 			else SBPL_FPRINTF(fDeb, "\n");

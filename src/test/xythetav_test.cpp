@@ -45,6 +45,7 @@ enum PlannerType
 	PLANNER_TYPE_RSTAR,
 	PLANNER_TYPE_VI,
 	PLANNER_TYPE_ANASTAR,
+	PLANNER_TYPE_ANASTARDOUBLE,
 
 	NUM_PLANNER_TYPES
 };
@@ -64,6 +65,8 @@ std::string PlannerTypeToStr(PlannerType plannerType)
 		return std::string("vi");
 	case PLANNER_TYPE_ANASTAR:
 		return std::string("anastar");
+	case PLANNER_TYPE_ANASTARDOUBLE:
+		return std::string("anastardouble");
 	default:
 		return std::string("invalid");
 	}
@@ -88,6 +91,9 @@ PlannerType StrToPlannerType(const char* str)
 	}
 	else if (!strcmp(str, "anastar")) {
 		return PLANNER_TYPE_ANASTAR;
+	}
+	else if(!strcmp(str, "anastardouble")) {
+		return PLANNER_TYPE_ANASTARDOUBLE;
 	}
 	else {
 		return INVALID_PLANNER_TYPE;
@@ -273,20 +279,27 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	case PLANNER_TYPE_ARASTAR:
 		printf("Initializing ARAPlanner...\n");
 		planner = new ARAPlanner(&environment_navxythetav, bforwardsearch);
+		planner->set_initialsolution_eps(initialEpsilon);
 		break;
 	case PLANNER_TYPE_ADSTAR:
 		printf("Initializing ADPlanner...\n");
 		planner = new ADPlanner(&environment_navxythetav, bforwardsearch);
+		planner->set_initialsolution_eps(initialEpsilon);
 		break;
 	case PLANNER_TYPE_RSTAR:
 		//VIEW WHY
 		printf("Invalid configuration: xythetav environment does not support rstar planner...\n");
 		//return 0;
 		planner = new RSTARPlanner(&environment_navxythetav, bforwardsearch);
+		planner->set_initialsolution_eps(initialEpsilon);
 		break;
 	case PLANNER_TYPE_ANASTAR:
 		printf("Initializing anaPlanner...\n");
 		planner = new anaPlanner(&environment_navxythetav, bforwardsearch);
+		break;
+	case PLANNER_TYPE_ANASTARDOUBLE:
+		printf("Initializing anaPlanner with key as double type...\n");
+		planner = new anaPlannerDouble(&environment_navxythetav, bforwardsearch);
 		break;
 	default:
 		printf("Invalid planner type\n");
@@ -302,7 +315,7 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 		printf("ERROR: failed to set goal state\n");
 		throw new SBPL_Exception();
 	}
-	planner->set_initialsolution_eps(initialEpsilon);
+	
 	planner->set_search_mode(bsearchuntilfirstsolution);
 
 	// plan

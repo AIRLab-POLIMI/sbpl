@@ -370,7 +370,7 @@ int get_next_point(bresenham_param_t *params)
 
 //converts discretized version of angle into continuous (radians)
 //maps 0->0, 1->delta, 2->2*delta, ...
-/*double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS)
+double DiscTheta2Cont(int nTheta, int NUMOFANGLEVALS)
 {
     double thetaBinSize = 2.0 * PI_CONST / NUMOFANGLEVALS;
     return nTheta * thetaBinSize;
@@ -382,7 +382,7 @@ int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS)
 {
     double thetaBinSize = 2.0 * PI_CONST / NUMOFANGLEVALS;
     return (int)(normalizeAngle(fTheta + thetaBinSize / 2.0) / (2.0 * PI_CONST) * (NUMOFANGLEVALS));
-}*/
+}
 
 double round_two_decimal(double val){
 	return round(val*100)/100;
@@ -390,7 +390,7 @@ double round_two_decimal(double val){
 
 //converts discretized version of angle into continuous (radians)
 //maps 0->0, 1->delta, 2->2*delta, ...
-double DiscTheta2Cont(int nTheta, int numtheta)
+double DiscTheta2ContNotUnif(int nTheta, int numtheta)
 {
     vector<double> theta_cont;
 	
@@ -416,7 +416,7 @@ double DiscTheta2Cont(int nTheta, int numtheta)
 
 //converts continuous (radians) version of angle into discrete
 //maps 0->0, [delta/2, 3/2*delta)->1, [3/2*delta, 5/2*delta)->2,...
-int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS)
+int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS)
 {
     vector<double> all_theta_cont;
 	

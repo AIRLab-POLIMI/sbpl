@@ -27,48 +27,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HEADERS_H_
-#define __HEADERS_H_
+#ifndef __HEAPDOUBLE_H_
+#define __HEAPDOUBLE_H_
 
-#include <sbpl/sbpl_exception.h>
-#include <sbpl/config.h>
-
-#if MEM_CHECK == 1
-#define _CRTDBG_MAP_ALLOC 
-#define CRTDBG_MAP_ALLOC
-#endif
-
-#include <stdlib.h> //have to go after the defines above
-#if MEM_CHECK == 1
-#include <crtdbg.h>
-#endif
-
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/discrete_space_information/environment_nav2D.h>
-#include <sbpl/discrete_space_information/environment_nav2Duu.h>
-#include <sbpl/discrete_space_information/environment_navxythetalat.h>
-#include <sbpl/discrete_space_information/environment_navxythetav.h>
-#include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
-#include <sbpl/discrete_space_information/environment_robarm.h>
-#include <sbpl/discrete_space_information/environment_XXX.h>
-#include <sbpl/planners/adplanner.h>
-#include <sbpl/planners/ANAplanner.h>
-#include <sbpl/planners/ANAPlannerDouble.h>
-#include <sbpl/planners/araplanner.h>
 #include <sbpl/planners/planner.h>
-#include <sbpl/planners/ppcpplanner.h>
-#include <sbpl/planners/rstarplanner.h>
-#include <sbpl/planners/viplanner.h>
-#include <sbpl/utils/2Dgridsearch.h>
-#include <sbpl/utils/heap.h>
-#include <sbpl/utils/list.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdp.h>
-#include <sbpl/utils/mdpconfig.h>
-#include <sbpl/utils/sbpl_fifo.h>
-#include <sbpl/utils/sbpl_bfs_2d.h>
-#include <sbpl/utils/sbpl_bfs_3d.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl/utils/keydouble.h>
+
+//the maximum size of the heap
+#define HEAPSIZE 20000000 
+#define HEAPSIZE_INIT 5000
+
+struct HEAPELEMENT
+{
+    AbstractSearchState *heapstate;
+    CKeyDouble key;
+};
+
+typedef struct HEAPELEMENT heapelement;
+
+class CHeapDouble
+{
+    //data
+public:
+    int percolates; //for counting purposes
+    heapelement* heap;
+    int currentsize;
+    int allocated;
+
+    //constructors
+public:
+    CHeapDouble();
+    ~CHeapDouble();
+
+    //functions
+public:
+    bool emptyheap();
+    bool fullheap();
+    bool inheap(AbstractSearchState *AbstractSearchState);
+    CKeyDouble getkeyheap(AbstractSearchState *AbstractSearchState);
+    void makeemptyheap();
+    void insertheap(AbstractSearchState *AbstractSearchState, CKeyDouble key);
+    void deleteheap(AbstractSearchState *AbstractSearchState);
+    void updateheap(AbstractSearchState *AbstractSearchState, CKeyDouble NewKey);
+    AbstractSearchState *getminheap();
+    AbstractSearchState *getminheap(CKeyDouble& ReturnKey);
+    CKeyDouble getminkeyheap();
+    AbstractSearchState *deleteminheap();
+    void makeheap();
+    void insert_unsafe(AbstractSearchState* state, CKeyDouble key);
+    void updateheap_unsafe(AbstractSearchState* AbstractSearchState, CKeyDouble NewKey);
+    void deleteheap_unsafe(AbstractSearchState* AbstractSearchState);
+
+private:
+    void percolatedown(int hole, heapelement tmp);
+    void percolateup(int hole, heapelement tmp);
+    void percolateupordown(int hole, heapelement tmp);
+
+    void growheap();
+    void sizecheck();
+};
 
 #endif
 
