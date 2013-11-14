@@ -1162,7 +1162,7 @@ bool EnvironmentNAVXYTHETAV::ReadSinglePose(sbpl_xy_theta_v_pt_t* pose, FILE* fI
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
 	pose->y = atof(sTemp);
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
-	pose->theta = atof(sTemp);
+	pose->theta = round_two_decimal(atof(sTemp));
 	if (fscanf(fIn, "%s", sTemp) == 0) return false;
 	pose->v = atof(sTemp);
 

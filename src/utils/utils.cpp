@@ -394,14 +394,32 @@ double DiscTheta2ContNotUnif(int nTheta, int numtheta)
 {
     vector<double> theta_cont;
 	
-	theta_cont.push_back(atan(0));
-	theta_cont.push_back(atan(1.0/3.0));
-	theta_cont.push_back(atan(1));
-	theta_cont.push_back(atan(3));
-	
-	for(int i=1;i<=3;i++){
-		for(int j=0;j<4;j++){
-			theta_cont.push_back(theta_cont.at(j)+PI_CONST/2*i);
+	if(numtheta == 16){
+		theta_cont.push_back(atan(0));
+		theta_cont.push_back(atan(1.0/3.0));
+		theta_cont.push_back(atan(1));
+		theta_cont.push_back(atan(3));
+		
+		for(int i=1;i<=3;i++){
+			for(int j=0;j<4;j++){
+				theta_cont.push_back(theta_cont.at(j)+PI_CONST/2*i);
+			}
+		}
+	}
+	else if(numtheta == 32){
+		theta_cont.push_back(atan(0));
+		theta_cont.push_back(atan(1.0/7.0));
+		theta_cont.push_back(atan(1.0/3.0));
+		theta_cont.push_back(atan(1.0/1.5));
+		theta_cont.push_back(atan(1));
+		theta_cont.push_back(atan(1.5));
+		theta_cont.push_back(atan(3));
+		theta_cont.push_back(atan(7));
+		
+		for(int i=1;i<=3;i++){
+			for(int j=0;j<8;j++){
+				theta_cont.push_back(theta_cont.at(j)+PI_CONST/2*i);
+			}
 		}
 	}
 	
@@ -420,14 +438,32 @@ int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS)
 {
     vector<double> all_theta_cont;
 	
-	all_theta_cont.push_back(atan(0));
-	all_theta_cont.push_back(atan(1.0/3.0));
-	all_theta_cont.push_back(atan(1));
-	all_theta_cont.push_back(atan(3.0));
-	
-	for(int i=1;i<=3;i++){
-		for(int j=0;j<4;j++){
-			all_theta_cont.push_back(all_theta_cont.at(j)+PI_CONST/2*i);
+	if(NUMOFANGLEVALS == 16){
+		all_theta_cont.push_back(atan(0));
+		all_theta_cont.push_back(atan(1.0/3.0));
+		all_theta_cont.push_back(atan(1));
+		all_theta_cont.push_back(atan(3.0));
+		
+		for(int i=1;i<=3;i++){
+			for(int j=0;j<4;j++){
+				all_theta_cont.push_back(all_theta_cont.at(j)+PI_CONST/2*i);
+			}
+		}
+	}
+	else if(NUMOFANGLEVALS == 32){
+		all_theta_cont.push_back(atan(0));
+		all_theta_cont.push_back(atan(1.0/7.0));
+		all_theta_cont.push_back(atan(1.0/3.0));
+		all_theta_cont.push_back(atan(1.0/1.5));
+		all_theta_cont.push_back(atan(1));
+		all_theta_cont.push_back(atan(1.5));
+		all_theta_cont.push_back(atan(3));
+		all_theta_cont.push_back(atan(7));
+		
+		for(int i=1;i<=3;i++){
+			for(int j=0;j<8;j++){
+				all_theta_cont.push_back(all_theta_cont.at(j)+PI_CONST/2*i);
+			}
 		}
 	}
 	
@@ -439,7 +475,7 @@ int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS)
 	
 	int i=0;
 	
-	for(i=0;i<all_theta_cont.size() && round_two_decimal(all_theta_cont.at(i)) != round_two_decimal(fTheta);i++);
+	for(i=0;i<all_theta_cont.size() && fabs(round_two_decimal(all_theta_cont.at(i)) - round_two_decimal(fTheta))>(PI_CONST*2/(NUMOFANGLEVALS*4));i++);
 	
 	return i;
 }
