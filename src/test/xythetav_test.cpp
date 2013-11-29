@@ -422,7 +422,7 @@ int planandnavigatexythetav(PlannerType plannerType, char* envCfgFilename, char*
 	//	perimeterptsV.clear();
 
 	// initialize true map from the environment file without perimeter or motion primitives
-	if (!trueenvironment_navxythetav.InitializeEnv(envCfgFilename)) {
+	if (!trueenvironment_navxythetav.InitializeEnv(envCfgFilename, perimeterptsV, motPrimFilename)) {
 		printf("ERROR: InitializeEnv failed\n");
 		throw new SBPL_Exception();
 	}
@@ -430,6 +430,15 @@ int planandnavigatexythetav(PlannerType plannerType, char* envCfgFilename, char*
 	// environment parameters
 	int size_x = -1, size_y = -1, num_thetas = -1, num_v = -1;
 	vector<double> velocities;
+	
+	velocities.push_back(-9.0);
+	velocities.push_back(-3.0);
+	velocities.push_back(-1.5);
+	velocities.push_back(0.0);
+	velocities.push_back(1.5);
+	velocities.push_back(3.0);
+	velocities.push_back(9.0);
+	
 	double startx = -1, starty = -1, starttheta = -1, startv = -1;
 	double goalx = -1, goaly = -1, goaltheta = -1, goalv = -1;
 	double cellsize_m = 0.0;

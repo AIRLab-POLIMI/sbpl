@@ -1764,10 +1764,11 @@ bool EnvironmentNAVXYTHETAV::InitializeEnv(int width, int height, int numthetadi
 	EnvNAVXYTHETAVCfg.NumThetaDirs = numthetadirs;
 	EnvNAVXYTHETAVCfg.numV = numv;
 	
+	EnvNAVXYTHETAVCfg.velocities.clear();
 	for(int i=0;i<numv;i++){
-		EnvNAVXYTHETAVCfg.velocities.at(i) = velocities.at(i);
+		EnvNAVXYTHETAVCfg.velocities.push_back(velocities.at(i));
 	}
-
+	
 	//TODO - need to set the tolerance as well
 
 	SetConfiguration(width, height, mapdata, CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m),
