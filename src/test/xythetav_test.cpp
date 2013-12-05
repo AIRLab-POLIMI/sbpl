@@ -31,6 +31,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+//#include <sstream>
 
 using namespace std;
 
@@ -326,6 +327,25 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 
 	environment_navxythetav.PrintTimeStat(stdout);
 
+	// write solution to sol.txt
+	/*for(int contSols=0;contSols<((anaPlannerDouble*)planner)->sols.size();contSols++){
+		stringstream nomeSC;
+		nomeSC << "solContinuous" << contSols << ".txt";
+		FILE* fSolC = fopen(nomeSC.str().c_str(), "w");
+		if (fSolC == NULL) {
+			printf("ERROR: could not open solution file\n");
+			throw new SBPL_Exception();
+		}
+		// write the continuous solution to file
+		vector<sbpl_xy_theta_v_pt_t> xythetavPath;
+		environment_navxythetav.ConvertStateIDPathintoXYThetaVPath(&((anaPlannerDouble*)planner)->sols.at(contSols), &xythetavPath);
+		printf("solution size=%d\n", (unsigned int)xythetavPath.size());
+		for (unsigned int i = 0; i < xythetavPath.size(); i++) {
+			fprintf(fSolC, "%.3f %.3f %.3f %.3f\n", xythetavPath.at(i).x, xythetavPath.at(i).y, xythetavPath.at(i).theta, xythetavPath.at(i).v);
+		}
+		fclose(fSolC);
+	}*/
+	
 	// write solution to sol.txt
 	const char* solC = "solContinuous.txt";
 	FILE* fSolC = fopen(solC, "w");

@@ -98,6 +98,7 @@ typedef struct anaDoubleSEARCHSTATESPACE
 class anaPlannerDouble : public SBPLPlanner
 {
 public:
+	//std::vector<std::vector<int> > sols;
     /**
      * \brief replan a path within the allocated time, return the solution in the vector
      */

@@ -10,6 +10,7 @@
 #include <sbpl/planners/ANAPlannerDouble.h>
 #include <sbpl/utils/heapdouble.h>
 #include <sbpl/utils/list.h>
+//#include <sstream>
 
 using namespace std;
 
@@ -838,6 +839,11 @@ bool anaPlannerDouble::Search(anaDoubleSearchStateSpace_t* pSearchStateSpace, ve
                    pSearchStateSpace->eps,
                    ((anaDoubleState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g, double(clock()
                        - TimeStarted) / CLOCKS_PER_SEC, MaxMemoryCounter);
+			
+			/*int sc;
+ 			pathIds = GetSearchPath(pSearchStateSpace, sc);
+			vector<int> copy(pathIds);
+			sols.push_back(copy);*/
 
             //printf("states expanded: %d\t states considered: %d\t time elapsed: %f\n",searchexpands - prevexpands, pSearchStateSpace->heap->currentsize, double(clock() - TimeStarted)/CLOCKS_PER_SEC);
         }
