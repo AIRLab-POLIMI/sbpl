@@ -498,6 +498,43 @@ double DiscV2Cont(int nV, vector<double> velocities){
 	return velocities[nV];
 }
 
+int ContSteer2Disc(double fSteer, int NUMOFSTEERINGANGLES){
+	if(NUMOFSTEERINGANGLES == 5){
+		const double steer[] = {-PI_CONST*2/9, -PI_CONST*2/18, 0, PI_CONST*2/18, PI_CONST*2/9};
+		int minindex = 0;
+		double min = fabs(fSteer - steer[0]);
+		
+		for(int i=1;i<NUMOFSTEERINGANGLES;i++){
+			if(min > fabs(fSteer - steer[i])){
+				minindex = i;
+				min = fabs(fSteer - steer[i]);
+			}
+		}
+	
+		return minindex;
+	}
+	else{
+		return -1;
+	}
+}
+
+double DiscSteer2Cont(int nSteer, int NUMOFSTEERINGANGLES){
+	if(NUMOFSTEERINGANGLES==5){
+		const double steer[] = {-PI_CONST*2/9, -PI_CONST*2/18, 0, PI_CONST*2/18, PI_CONST*2/9};
+		
+		while(nSteer >= NUMOFSTEERINGANGLES)
+			nSteer -= NUMOFSTEERINGANGLES;
+		
+		while(nSteer < 0)
+			nSteer += NUMOFSTEERINGANGLES;
+		
+		return steer[nSteer];
+	}
+	else{
+		return PI_CONST/2;
+	}
+}
+
 //input angle should be in radians
 //counterclockwise is positive
 //output is an angle in the range of from 0 to 2*PI
@@ -898,6 +935,23 @@ void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_v_pt_
     get_2d_motion_cells(polygon, ps, cells, res);
 }
 
+void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_v_steer_pt_t> poses, 
+						 std::vector<sbpl_2Dcell_t>* cells, double res)
+{
+	vector<sbpl_xy_theta_pt_t> ps;
+
+    //call get footprint on the rest of the points
+    for (int i = 0; i < poses.size(); i++) {
+		sbpl_xy_theta_pt_t tmp;
+		tmp.x=poses.at(i).x;
+		tmp.y=poses.at(i).y;
+		tmp.theta=poses.at(i).theta;
+		ps.push_back(tmp);
+    }
+
+    get_2d_motion_cells(polygon, ps, cells, res);
+}
+
 //This function is inefficient and should be avoided if possible (you should
 //use overloaded functions that uses a set for the cells)!
 void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
@@ -920,6 +974,18 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* 
                             double res)
 {
     sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
+}
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
+                            sbpl_xy_theta_v_steer_pt_t pose, double res)
+{
+	sbpl_xy_theta_pt_t p;
 	
 	p.x=pose.x;
 	p.y=pose.y;
@@ -1061,6 +1127,18 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cel
 }
 
 void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_pt_t pose, double res){
+	sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
+}
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_steer_pt_t pose,
+                            double res)
+{
 	sbpl_xy_theta_pt_t p;
 	
 	p.x=pose.x;

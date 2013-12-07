@@ -221,7 +221,7 @@ public:
 
 	bool operator<(const sbpl_xy_theta_v_cell_t cell) const
 	{
-		return x < cell.x || (x == cell.x && (y < cell.y || (y == cell.y && (theta < cell.theta  || (theta == cell.theta && v == cell.v)))));
+		return x < cell.x || (x == cell.x && (y < cell.y || (y == cell.y && (theta < cell.theta  || (theta == cell.theta && v < cell.v)))));
 	}
 
 	int x;
@@ -263,6 +263,82 @@ public:
 	double y;
 	double theta;
 	double v;
+};
+
+class sbpl_xy_theta_v_steer_cell_t
+{
+public:
+	sbpl_xy_theta_v_steer_cell_t()
+	{
+		x = 0;
+		y = 0;
+		theta = 0;
+		v = 0;
+		steer = 0;
+	}
+
+	sbpl_xy_theta_v_steer_cell_t(int x_, int y_, int theta_, int v_, int steer_)
+	{
+		x = x_;
+		y = y_;
+		theta = theta_;
+		v = v_;
+		steer = steer_;
+	}
+
+	bool operator==(const sbpl_xy_theta_v_steer_cell_t cell) const
+	{
+		return x == cell.x && y == cell.y && theta == cell.theta && v == cell.v;
+	}
+
+	bool operator<(const sbpl_xy_theta_v_steer_cell_t cell) const
+	{
+		return x < cell.x || (x == cell.x && (y < cell.y || (y == cell.y && (theta < cell.theta  || (theta == cell.theta && (v < cell.v || (v == cell.v && steer < cell.steer)))))));
+	}
+
+	int x;
+	int y;
+	int theta;
+	int v;
+	int steer;
+};
+
+class sbpl_xy_theta_v_steer_pt_t
+{
+public:
+	sbpl_xy_theta_v_steer_pt_t()
+	{
+		x = 0;
+		y = 0;
+		theta = 0;
+		v = 0;
+		steer = 0;
+	}
+
+	sbpl_xy_theta_v_steer_pt_t(double x_, double y_, double theta_, double v_, double steer_)
+	{
+		x = x_;
+		y = y_;
+		theta = theta_;
+		v = v_;
+		v = steer_;
+	}
+
+	bool operator==(const sbpl_xy_theta_v_steer_pt_t p) const
+	{
+		return x == p.x && y == p.y && theta == p.theta && v == p.v && steer == p.steer;
+	}
+
+	bool operator<(const sbpl_xy_theta_v_steer_pt_t p) const
+	{
+		return x < p.x || (x == p.x && (y < p.y || (y == p.y && (theta < p.theta || (theta == p.theta && (v < p.v || (v == p.v && steer < p.steer)))))));
+	}
+
+	double x;
+	double y;
+	double theta;
+	double v;
+	double steer;
 };
 
 typedef struct BINARYHIDDENVARIABLE
@@ -358,7 +434,7 @@ int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS);
  *
  * \note maps corresponding vector values
  */
-int ContV2Disc(double fV, std::vector<double>);
+int ContV2Disc(double fV, std::vector<double> velocities);
 
 /**
  * \brief converts discrete version of velocity into continuous value
@@ -366,6 +442,20 @@ int ContV2Disc(double fV, std::vector<double>);
  * \note maps corresponding vector values
  */
 double DiscV2Cont(int nV, std::vector<double> velocities);
+
+/**
+ * \brief converts continuous version of steering angle into discrete
+ *
+ * \note maps corresponding values
+ */
+int ContSteer2Disc(double fSteer, int NUMOFSTEERINGANGLES);
+
+/**
+ * \brief converts discrete version of steering angle into continuous value
+ *
+ * \note maps corresponding values
+ */
+double DiscSteer2Cont(int nSteer, int NUMOFSTEERINGANGLES);
 
 /**
  * \note counterclockwise is positive
@@ -398,16 +488,25 @@ void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_t
 void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_v_pt_t> poses, 
 						 std::vector<sbpl_2Dcell_t>* cells, double res);
 
+void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_v_steer_pt_t> poses, 
+						 std::vector<sbpl_2Dcell_t>* cells, double res);
+
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
                             sbpl_xy_theta_pt_t pose, double res);
 
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
                             sbpl_xy_theta_v_pt_t pose, double res);
 
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
+                            sbpl_xy_theta_v_steer_pt_t pose, double res);
+
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
                             double res);
 
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_pt_t pose,
+                            double res);
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_steer_pt_t pose,
                             double res);
 
 void writePlannerStats(std::vector<PlannerStats> s, FILE* fout);
