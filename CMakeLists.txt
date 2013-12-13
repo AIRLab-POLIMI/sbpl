@@ -48,3 +48,6 @@ target_link_libraries(test_adjacency_list sbpl)
 
 add_executable(xythetav_test src/test/xythetav_test.cpp)
 target_link_libraries(xythetav_test sbpl)
+
+add_executable(xythetavsteer_test src/test/xythetavsteer_test.cpp)
+target_link_libraries(xythetavsteer_test sbpl)
