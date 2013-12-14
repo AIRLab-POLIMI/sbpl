@@ -1254,7 +1254,7 @@ bool EnvironmentNAVXYTHETAVSTEER::ReadSinglePose(sbpl_xy_theta_v_steer_pt_t* pos
 	pose->steer = atof(sTemp);
 
 	pose->theta = normalizeAngle(pose->theta);
-	pose->steer = normalizeAngle(pose->steer);
+	pose->steer = pose->steer;
 
 	return true;
 }
