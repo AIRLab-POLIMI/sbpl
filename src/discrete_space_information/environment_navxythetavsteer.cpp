@@ -17,7 +17,6 @@
 #include <sbpl/utils/2Dgridsearch.h>
 #include <sbpl/utils/mdp.h>
 #include <sbpl/utils/mdpconfig.h>
-#include <../../../Software/ACADOtoolkit/examples/ocp/rocket_with_templates_ocp.hpp>
 #include <string.h>
 #include <stdlib.h>
 #include <cmath>
