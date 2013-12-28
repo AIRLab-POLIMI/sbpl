@@ -27,6 +27,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+#define XYTHETAVTEST_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
+
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -278,12 +280,16 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	SBPLPlanner* planner = NULL;
 	switch (plannerType) {
 	case PLANNER_TYPE_ARASTAR:
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 		printf("Initializing ARAPlanner...\n");
+#endif
 		planner = new ARAPlanner(&environment_navxythetav, bforwardsearch);
 		planner->set_initialsolution_eps(initialEpsilon);
 		break;
 	case PLANNER_TYPE_ADSTAR:
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 		printf("Initializing ADPlanner...\n");
+#endif
 		planner = new ADPlanner(&environment_navxythetav, bforwardsearch);
 		planner->set_initialsolution_eps(initialEpsilon);
 		break;
@@ -295,11 +301,15 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 		planner->set_initialsolution_eps(initialEpsilon);
 		break;
 	case PLANNER_TYPE_ANASTAR:
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 		printf("Initializing anaPlanner...\n");
+#endif
 		planner = new anaPlanner(&environment_navxythetav, bforwardsearch);
 		break;
 	case PLANNER_TYPE_ANASTARDOUBLE:
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 		printf("Initializing anaPlanner with key as double type...\n");
+#endif
 		planner = new anaPlannerDouble(&environment_navxythetav, bforwardsearch);
 		break;
 	default:
@@ -320,12 +330,16 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 	planner->set_search_mode(bsearchuntilfirstsolution);
 
 	// plan
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 	printf("start planning...\n");
+#endif
 	bRet = planner->replan(allocated_time_secs, &solution_stateIDs_V);
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
 	printf("done planning\n");
 	printf("size of solution=%d\n", (unsigned int)solution_stateIDs_V.size());
 
 	environment_navxythetav.PrintTimeStat(stdout);
+#endif
 
 	// write solution to sol.txt
 	/*for(int contSols=0;contSols<((anaPlannerDouble*)planner)->sols.size();contSols++){

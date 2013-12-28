@@ -47,6 +47,8 @@
 //---------------------
 #define ARA_INCONS_LIST_ID 0
 
+#define ARA_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
+
 class CHeap;
 class CList;
 class DiscreteSpaceInformation;

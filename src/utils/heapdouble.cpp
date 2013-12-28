@@ -159,12 +159,16 @@ void CHeapDouble::growheap()
     heapelement* newheap;
     int i;
 
+#if HEAPDOUBLE_PERFORMANCE_TEST == 0
     SBPL_PRINTF("growing heap size from %d ", allocated);
+#endif
 
     allocated = 2 * allocated;
     if (allocated > HEAPSIZE) allocated = HEAPSIZE;
 
+#if HEAPDOUBLE_PERFORMANCE_TEST == 0
     SBPL_PRINTF("to %d\n", allocated);
+#endif
 
     newheap = new heapelement[allocated];
 

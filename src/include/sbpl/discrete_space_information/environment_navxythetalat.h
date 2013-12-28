@@ -49,6 +49,7 @@
 //decrease, increase, same angle while moving plus decrease, increase angle while standing.
 #define NAVXYTHETALAT_DEFAULT_ACTIONWIDTH 5 
 #define NAVXYTHETALAT_COSTMULT_MTOMM 1000
+#define NAVXYTHETALAT_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
 
 class CMDPSTATE;
 class MDPConfig;

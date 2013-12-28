@@ -36,6 +36,7 @@
 //the maximum size of the heap
 #define HEAPSIZE 20000000 
 #define HEAPSIZE_INIT 5000
+#define HEAPDOUBLE_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
 
 struct HEAPELEMENT
 {

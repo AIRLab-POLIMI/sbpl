@@ -19,6 +19,8 @@
 //---------------------
 #define ana_INCONS_LIST_ID 0
 
+#define ANAPLANNERDOUBLE_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
+
 class CHeapDouble;
 class DiscreteSpaceInformation;
 class StateChangeQuery;

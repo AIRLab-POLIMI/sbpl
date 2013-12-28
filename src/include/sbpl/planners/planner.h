@@ -140,6 +140,16 @@ public:
     int expands;
 };
 
+class PlannerStatsExtended{
+public:
+	double eps;
+	double cost;
+	double time;
+	double memcount;
+	double expands;
+	double inctime;
+};
+
 typedef enum
 {
     //different state types if you have more than one type inside a single planner

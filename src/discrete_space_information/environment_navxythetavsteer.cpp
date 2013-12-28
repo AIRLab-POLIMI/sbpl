@@ -61,7 +61,9 @@ EnvironmentNAVXYTHETAVSTEER::EnvironmentNAVXYTHETAVSTEER(){
 }
 
 EnvironmentNAVXYTHETAVSTEER::~EnvironmentNAVXYTHETAVSTEER(){
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("destroying XYTHETAVSTEER\n");
+#endif
 	if (grid2Dsearchfromstart != NULL) delete grid2Dsearchfromstart;
 	grid2Dsearchfromstart = NULL;
 
@@ -132,6 +134,7 @@ unsigned int EnvironmentNAVXYTHETAVSTEER::GETHASHBIN(unsigned int x, unsigned in
 
 void EnvironmentNAVXYTHETAVSTEER::PrintHashTableHist()
 {
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	int s0 = 0, s1 = 0, s50 = 0, s100 = 0, s200 = 0, s300 = 0, slarge = 0;
 
 	for (int j = 0; j < (int)EnvNAVXYTHETAVSTEER.HashTableSize; j++) {
@@ -152,6 +155,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintHashTableHist()
 	}
 	SBPL_PRINTF("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n", s0, s1, s50, s100,
 				s200, s300, slarge);
+#endif
 }
 
 void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
@@ -279,7 +283,9 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 	EnvNAVXYTHETAVSTEERCfg.obsthresh = atoi(sTemp);
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("obsthresh = %d\n", EnvNAVXYTHETAVSTEERCfg.obsthresh);
+#endif
 
 	//cost_inscribed_thresh: 
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
@@ -298,7 +304,9 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 	EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh = atoi(sTemp);
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("cost_inscribed_thresh = %d\n", EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh);
+#endif
 
 	//cost_possibly_circumscribed_thresh: 
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
@@ -317,7 +325,9 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 	EnvNAVXYTHETAVSTEERCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETAVSTEERCfg.cost_possibly_circumscribed_thresh);
+#endif
 
 	//cellsize
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
@@ -679,7 +689,9 @@ void EnvironmentNAVXYTHETAVSTEER::ComputeReplanningData()
 }
 
 void EnvironmentNAVXYTHETAVSTEER::PrecomputeActionswithCompleteMotionPrimitive(vector<SBPL_xythetavsteer_mprimitive>* motionprimitiveV){
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("Pre-computing action data using motion primitives for every pair velocity/angle...\n");
+#endif
 	EnvNAVXYTHETAVSTEERCfg.ActionsV = new vector<vector<EnvNAVXYTHETAVSTEERAction_t> *>();
 	EnvNAVXYTHETAVSTEERCfg.PredActionsV = new vector<EnvNAVXYTHETAVSTEERActionIndex_t> [EnvNAVXYTHETAVSTEERCfg.numSteers*EnvNAVXYTHETAVSTEERCfg.numV*EnvNAVXYTHETAVSTEERCfg.NumThetaDirs];
 	
@@ -706,7 +718,9 @@ void EnvironmentNAVXYTHETAVSTEER::PrecomputeActionswithCompleteMotionPrimitive(v
 	for(int sind = 0; sind < EnvNAVXYTHETAVSTEERCfg.numSteers; sind++){
 		for(int vind = 0; vind < EnvNAVXYTHETAVSTEERCfg.numV; vind++){
 			for (int tind = 0; tind < EnvNAVXYTHETAVSTEERCfg.NumThetaDirs; tind++) {
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 				SBPL_PRINTF("pre-computing for pair (angle, speed, angle) (%d,%d,%d) out of (%d,%d,%d)\n", sind, vind, tind, EnvNAVXYTHETAVSTEERCfg.numSteers, EnvNAVXYTHETAVSTEERCfg.numV, EnvNAVXYTHETAVSTEERCfg.NumThetaDirs);
+#endif
 
 				//compute current index
 				int vector_index = sind*EnvNAVXYTHETAVSTEERCfg.numV*EnvNAVXYTHETAVSTEERCfg.NumThetaDirs+vind*EnvNAVXYTHETAVSTEERCfg.NumThetaDirs+tind;
@@ -891,7 +905,9 @@ void EnvironmentNAVXYTHETAVSTEER::PrecomputeActionswithCompleteMotionPrimitive(v
 	//now compute replanning data
 	ComputeReplanningData();
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("done pre-computing action data based on motion primitives\n");
+#endif
 }
 
 void EnvironmentNAVXYTHETAVSTEER::InitializeEnvConfig(vector<SBPL_xythetavsteer_mprimitive>* motionprimitiveV)
@@ -924,11 +940,13 @@ void EnvironmentNAVXYTHETAVSTEER::InitializeEnvConfig(vector<SBPL_xythetavsteer_
 	temppose.theta = 0.0;
 	vector<sbpl_2Dcell_t> footprint;
 	get_2d_footprint_cells(EnvNAVXYTHETAVSTEERCfg.FootprintPolygon, &footprint, temppose, EnvNAVXYTHETAVSTEERCfg.cellsize_m);
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("number of cells in footprint of the robot = %d\n", (unsigned int)footprint.size());
 
 	for (vector<sbpl_2Dcell_t>::iterator it = footprint.begin(); it != footprint.end(); ++it) {
 		SBPL_PRINTF("Footprint cell at (%d, %d)\n", it->x, it->y);
 	}
+#endif
 
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "footprint cells (size=%d):\n", (int)footprint.size());
@@ -962,7 +980,9 @@ void EnvironmentNAVXYTHETAVSTEER::InitializeEnvironment()
 
 	int maxsize = EnvNAVXYTHETAVSTEERCfg.EnvWidth_c * EnvNAVXYTHETAVSTEERCfg.EnvHeight_c * EnvNAVXYTHETAVSTEERCfg.NumThetaDirs * EnvNAVXYTHETAVSTEERCfg.numV * EnvNAVXYTHETAVSTEERCfg.numSteers;
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("environment stores states in hashtable\n");
+#endif
 
 	//initialize the map from Data to StateID
 	//Maximum hash table size
@@ -1000,7 +1020,9 @@ bool EnvironmentNAVXYTHETAVSTEER::ReadMotionPrimitives(FILE* fMotPrims){
 	int dTemp;
 	int totalNumofActions = 0;
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("Reading in motion primitives...");
+#endif
 
 	//read in the resolution
 	strcpy(sExpected, "resolution_m:");
@@ -1092,7 +1114,9 @@ bool EnvironmentNAVXYTHETAVSTEER::ReadMotionPrimitives(FILE* fMotPrims){
 
 		EnvNAVXYTHETAVSTEERCfg.mprimV.push_back(motprim);
 	}
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("done reading of motion primitives");
+#endif
 
 	return true;
 }
@@ -1300,9 +1324,11 @@ void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 									EnvNAVXYTHETAVSTEERCfg.EndX_c, EnvNAVXYTHETAVSTEERCfg.EndY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
 		bNeedtoRecomputeStartHeuristics = false;
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 		SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVSTEERCfg.EndX_c,
 																				EnvNAVXYTHETAVSTEERCfg.EndY_c)/EnvNAVXYTHETAVSTEERCfg.velocities.at(EnvNAVXYTHETAVSTEERCfg.velocities.size()-1)));
+#endif
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.EndX_c,
 																				EnvNAVXYTHETAVCfg.EndY_c)));*/
@@ -1314,9 +1340,11 @@ void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 									EnvNAVXYTHETAVSTEERCfg.StartX_c, EnvNAVXYTHETAVSTEERCfg.StartY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
 		bNeedtoRecomputeGoalHeuristics = false;
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 		SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVSTEERCfg.StartX_c,
 																				EnvNAVXYTHETAVSTEERCfg.StartY_c)/EnvNAVXYTHETAVSTEERCfg.velocities.at(EnvNAVXYTHETAVSTEERCfg.velocities.size()-1)));
+#endif
 		
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.StartX_c,
@@ -1327,7 +1355,9 @@ void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 void EnvironmentNAVXYTHETAVSTEER::ComputeHeuristicValues()
 {
 	//whatever necessary pre-computation of heuristic values is done here
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("Precomputing heuristics\n");
+#endif
 	
 	//allocated 2D grid searches
 	grid2Dsearchfromstart = new SBPL2DGridSearch(EnvNAVXYTHETAVSTEERCfg.EnvWidth_c, EnvNAVXYTHETAVSTEERCfg.EnvHeight_c,
@@ -1339,10 +1369,13 @@ void EnvironmentNAVXYTHETAVSTEER::ComputeHeuristicValues()
 	grid2Dsearchfromstart->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
 	grid2Dsearchfromgoal->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
 	
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("done\n");
+#endif
 }
 
 void EnvironmentNAVXYTHETAVSTEER::PrintHeuristicValues(){
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	#ifndef ROS
 		const char* heur = "heur.txt";
 	#endif
@@ -1377,6 +1410,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintHeuristicValues(){
 	}
 	
 	SBPL_FCLOSE(fHeur);
+#endif
 }
 
 //-----------interface with outside functions-----------------------------------
@@ -1411,7 +1445,9 @@ bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(const char* sEnvFile, const vect
 		return false;
 	}
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("size of env: %d by %d\n", EnvNAVXYTHETAVSTEERCfg.EnvWidth_c, EnvNAVXYTHETAVSTEERCfg.EnvHeight_c);
+#endif
 
 	return true;
 }
@@ -1426,7 +1462,9 @@ bool EnvironmentNAVXYTHETAVSTEER::SetEnvParameter(const char* parameter, int val
 		return false;
 	}
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("setting parameter %s to %d\n", parameter, value);
+#endif
 
 	if (strcmp(parameter, "cost_inscribed_thresh") == 0) {
 		if (value < 0 || value > 255) {
@@ -1758,11 +1796,12 @@ void EnvironmentNAVXYTHETAVSTEER::PrintState(int stateID, bool bVerbose, FILE* f
 		throw new SBPL_Exception();
 	}
 #endif
-
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	if (fOut == NULL) fOut = stdout;
 
 	EnvNAVXYTHETAVSTEERHashEntry_t* HashEntry = EnvNAVXYTHETAVSTEER.StateID2DataTable[stateID];
 
+	
 	if (stateID == EnvNAVXYTHETAVSTEER.goalstateid && bVerbose) {
 		SBPL_FPRINTF(fOut, "the state is a goal state\n");
 	}
@@ -1772,10 +1811,12 @@ void EnvironmentNAVXYTHETAVSTEER::PrintState(int stateID, bool bVerbose, FILE* f
 	}
 
 	SBPL_FPRINTF(fOut, "x=%d y=%d theta=%d v=%d steer=%d\n", HashEntry->x, HashEntry->y, HashEntry->theta, HashEntry->v, HashEntry->steer);
+#endif
 }
 
 void EnvironmentNAVXYTHETAVSTEER::PrintEnv_Config(FILE* fOut)
 {
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	if(fOut != NULL){
 		fprintf(fOut, "discretization(cells): %d %d\n", EnvNAVXYTHETAVSTEERCfg.EnvWidth_c, EnvNAVXYTHETAVSTEERCfg.EnvHeight_c);
 		fprintf(fOut, "NumThetaDirs: %d\n", EnvNAVXYTHETAVSTEERCfg.NumThetaDirs);
@@ -1828,6 +1869,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintEnv_Config(FILE* fOut)
 			printf("\n");
 		}
 	}
+#endif
 }
 
 bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(int width, int height, int numthetadirs, int numv, int numsteers, vector<double> velocities,
@@ -1837,6 +1879,7 @@ bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(int width, int height, int numth
 							const vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
 							unsigned char obsthresh, unsigned char cost_inscribed_thresh,
 							unsigned char cost_possibly_circumscribed_thresh, const char* sMotPrimFile){
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("env: initialize with width=%d height=%d start=%.3f %.3f %.3f %.3f %.3f "
 				"goalx=%.3f %.3f %.3f %.3f %.3f cellsize=%.3f numthetadirs=%d numv=%d numsteers=%d, obsthresh=%d cost_inscribed_thresh=%d cost_possibly_circumscribed_thresh=%d\n",
 				width, height, startx, starty, starttheta, startv, startsteer, goalx, goaly, goaltheta, goalv, goalsteer, cellsize_m, numthetadirs, numv, numsteers,
@@ -1849,6 +1892,7 @@ bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(int width, int height, int numth
 	for (int i = 0; i < (int)perimeterptsV.size(); i++) {
 		SBPL_PRINTF("perimeter(%d) = %.4f %.4f\n", i, perimeterptsV.at(i).x, perimeterptsV.at(i).y);
 	}
+#endif
 
 	EnvNAVXYTHETAVSTEERCfg.obsthresh = obsthresh;
 	EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh = cost_inscribed_thresh;
@@ -2104,7 +2148,9 @@ int EnvironmentNAVXYTHETAVSTEER::SetStart(double x, double y, double theta, doub
 		return -1;
 	}
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("env: setting start to %.3f %.3f %.3f %.3f %.3f (%d %d %d %d %d)\n", x, y, theta, v, steer, startx, starty, starttheta, startv, startsteer);
+#endif
 
 	if (!IsValidConfiguration(startx, starty, starttheta, startv, startsteer)) {
 		SBPL_PRINTF("WARNING: start configuration %d %d %d %d %d is invalid\n", startx, starty, starttheta, startv, startsteer);
@@ -2140,16 +2186,20 @@ int EnvironmentNAVXYTHETAVSTEER::SetGoal(double x, double y, double theta, doubl
 	int goalv = ContV2Disc(v, EnvNAVXYTHETAVSTEERCfg.velocities);
 	int goalsteer = ContSteer2Disc(steer, EnvNAVXYTHETAVSTEERCfg.numSteers);
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("env: setting start to %.3f %.3f %.3f %.3f %.3f (%d %d %d %d %d)\n", x, y, theta, v, steer, goalx, goaly, goaltheta, goalv, goalsteer);
+#endif
 
 	if (!IsWithinMapCell(goalx, goaly)) {
 		SBPL_ERROR("ERROR: trying to set a goal cell %d %d that is outside of map\n", goalx, goaly);
 		return -1;
 	}
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	if (!IsValidConfiguration(goalx, goaly, goaltheta, goalv, goalsteer)) {
 		SBPL_PRINTF("WARNING: goal configuration is invalid\n");
 	}
+#endif
 
 	EnvNAVXYTHETAVSTEERHashEntry_t* OutHashEntry;
 	if ((OutHashEntry = GetHashEntry(goalx, goaly, goaltheta, goalv, goalsteer)) == NULL) {
@@ -2199,7 +2249,9 @@ void EnvironmentNAVXYTHETAVSTEER::ConvertStateIDPathintoXYThetaVPath(vector<int>
 	int targetx_c, targety_c, targettheta_c, targetv_c, targetsteer_c;
 	int sourcex_c, sourcey_c, sourcetheta_c, sourcev_c, sourcesteer_c;
 
+#if NAVXYTHETAVSTEER_PERFORMANCE_TEST == 0
 	SBPL_PRINTF("checks=%ld\n", checks);
+#endif
 
 	xythetavPath->clear();
 

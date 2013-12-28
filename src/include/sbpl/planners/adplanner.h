@@ -47,6 +47,8 @@
 //---------------------
 #define AD_INCONS_LIST_ID 0
 
+#define AD_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
+
 class CHeap;
 class CList;
 class DiscreteSpaceInformation;

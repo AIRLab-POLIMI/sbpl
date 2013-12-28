@@ -366,16 +366,22 @@ int anaPlannerDouble::ImprovePath(anaDoubleSearchStateSpace_t* pSearchStateSpace
 
     int retv = 3;
     if (searchgoalstate->g == std::numeric_limits<unsigned int>::max() && pSearchStateSpace->heap->emptyheap()) {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("solution does not exist: search exited because heap is empty\n");
+#endif
         retv = 0;
     }
     else if (!pSearchStateSpace->heap->emptyheap() && 0 < maxkey.key[0]) {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("search exited because it ran out of time\n");
+#endif
         retv = 2;
     }
     else if (searchgoalstate->g == std::numeric_limits<unsigned int>::max() && !pSearchStateSpace->heap->emptyheap()) {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("solution does not exist: search exited because all "
                "candidates for expansion have infinite heuristics\n");
+#endif
         retv = 0;
     }
 
@@ -619,6 +625,7 @@ int anaPlannerDouble::ReconstructPath(anaDoubleSearchStateSpace_t* pSearchStateS
 
 void anaPlannerDouble::PrintSearchPath(anaDoubleSearchStateSpace_t* pSearchStateSpace, FILE* fOut)
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     anaDoubleState* searchstateinfo;
     CMDPSTATE* state;
     int goalID;
@@ -675,14 +682,17 @@ void anaPlannerDouble::PrintSearchPath(anaDoubleSearchStateSpace_t* pSearchState
 
         environment_->PrintState(state->StateID, false, fOut);
     }
+#endif
 }
 
 void anaPlannerDouble::PrintSearchState(anaDoubleState* state, FILE* fOut)
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     fprintf(fOut, "state %d: h=%d g=%u iterc=%d callnuma=%d expands=%d heapind=%d inconslist=%d\n",
             state->MDPstate->StateID, state->h, state->g, state->iterationclosed, state->callnumberaccessed,
             state->numofexpands, state->heapindex, state->listelem[ana_INCONS_LIST_ID] ? 1 : 0);
     environment_->PrintState(state->MDPstate->StateID, true, fOut);
+#endif
 }
 
 int anaPlannerDouble::getHeurValue(anaDoubleSearchStateSpace_t* pSearchStateSpace, int StateID)
@@ -775,6 +785,9 @@ bool anaPlannerDouble::Search(anaDoubleSearchStateSpace_t* pSearchStateSpace, ve
     CKeyDouble key;
     TimeStarted = clock();
     searchexpands = 0;
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 1
+	vector<PlannerStatsExtended> planstats;
+#endif
 
 #if DEBUG
     fprintf(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
@@ -831,6 +844,7 @@ bool anaPlannerDouble::Search(anaDoubleSearchStateSpace_t* pSearchStateSpace, ve
         }
         open->makeheap();
 		
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         //print the solution cost and eps bound
         if (retVal == 1) {
             //printf("suboptimality=%f expands=%d g(searchgoal)=%d loop_time=%.3f time_elapsed=%.3f memoryCounter=%d\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands, ((anaState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC, double(clock() - TimeStarted)/CLOCKS_PER_SEC, MaxMemoryCounter);
@@ -847,6 +861,16 @@ bool anaPlannerDouble::Search(anaDoubleSearchStateSpace_t* pSearchStateSpace, ve
 
             //printf("states expanded: %d\t states considered: %d\t time elapsed: %f\n",searchexpands - prevexpands, pSearchStateSpace->heap->currentsize, double(clock() - TimeStarted)/CLOCKS_PER_SEC);
         }
+#elif ANAPLANNERDOUBLE_PERFORMANCE_TEST == 1
+		PlannerStatsExtended temp;
+		temp.eps = pSearchStateSpace->eps;
+		temp.cost = ((anaDoubleState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
+		temp.time = double(clock() - TimeStarted) / CLOCKS_PER_SEC;
+		temp.memcount = MaxMemoryCounter;
+		temp.inctime = double(clock()-loop_time) / CLOCKS_PER_SEC;
+		temp.expands = searchexpands;
+		planstats.push_back(temp);
+#endif
 
 #if DEBUG
         fprintf(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps, searchexpands - prevexpands,
@@ -866,27 +890,47 @@ bool anaPlannerDouble::Search(anaDoubleSearchStateSpace_t* pSearchStateSpace, ve
     fflush(fDeb);
 #endif
 
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("Suboptimality = %f\n", pSearchStateSpace->eps);
+#endif
 
     PathCost = ((anaDoubleState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
     MaxMemoryCounter += environment_->StateID2IndexMapping.size() * sizeof(int);
 
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("MaxMemoryCounter = %d\n", MaxMemoryCounter);
+#endif
 
     int solcost = std::numeric_limits<int>::max();
     bool ret = false;
     if (PathCost == std::numeric_limits<int>::max()) {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("could not find a solution\n");
+#endif
         ret = false;
     }
     else {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("solution is found\n");
+#elif ANAPLANNERDOUBLE_PERFORMANCE_TEST == 1
+		FILE* perfFile;
+		
+		if(perfFile=fopen("anastardoubleperf.txt", "w")){
+			for(int i=0;i<planstats.size();i++){
+				PlannerStatsExtended temp = planstats.at(i);
+				fprintf(perfFile, "%f %f %f %f %f %f\n", temp.time, temp.inctime, temp.cost, temp.eps, temp.expands, temp.memcount);
+			}
+			fclose(perfFile);
+		}
+#endif
         pathIds = GetSearchPath(pSearchStateSpace, solcost);
         ret = true;
     }
 
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("total expands this call = %d, planning time = %.3f secs, solution cost=%d\n", searchexpands, (clock()
         - TimeStarted) / ((double)CLOCKS_PER_SEC), solcost);
+#endif
 
     //fprintf(fStat, "%d %d\n", searchexpands, solcost);
 
@@ -914,13 +958,16 @@ int anaPlannerDouble::replan(double allocated_time_secs, vector<int>* solution_s
     bool bOptimalSolution = false;
     *psolcost = 0;
 
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
-
+#endif
     //plan
     if (!(bFound = Search(pSearchStateSpace_, pathIds, PathCost, bFirstSolution, bOptimalSolution,
                           allocated_time_secs)))
     {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
         printf("failed to find a solution\n");
+#endif
     }
 
     //copy the solution
@@ -933,7 +980,9 @@ int anaPlannerDouble::replan(double allocated_time_secs, vector<int>* solution_s
 
 int anaPlannerDouble::set_goal(int goal_stateID)
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("planner: setting goal to %d\n", goal_stateID);
+#endif
     environment_->PrintState(goal_stateID, true, stdout);
 
     if (bforwardsearch) {
@@ -954,7 +1003,9 @@ int anaPlannerDouble::set_goal(int goal_stateID)
 
 int anaPlannerDouble::set_start(int start_stateID)
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("planner: setting start to %d\n", start_stateID);
+#endif
     environment_->PrintState(start_stateID, true, stdout);
 
     if (bforwardsearch) {
@@ -986,7 +1037,9 @@ void anaPlannerDouble::costs_changed()
 
 int anaPlannerDouble::force_planning_from_scratch()
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("planner: forceplanfromscratch set\n");
+#endif
 
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
 
@@ -995,7 +1048,9 @@ int anaPlannerDouble::force_planning_from_scratch()
 
 int anaPlannerDouble::set_search_mode(bool bSearchUntilFirstSolution)
 {
+#if ANAPLANNERDOUBLE_PERFORMANCE_TEST == 0
     printf("planner: search mode set to %d\n", bSearchUntilFirstSolution);
+#endif
 
     bsearchuntilfirstsolution = bSearchUntilFirstSolution;
 
