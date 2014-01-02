@@ -968,10 +968,13 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
             double angular_time = angular_distance / ((PI_CONST / 4.0) /
                                   EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
             //make the cost the max of the two times
-            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost =
-                    (int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * max(linear_time, angular_time)));
+            //EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost =
+                    //(int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * max(linear_time, angular_time)));
             //use any additional cost multiplier
-            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
+            //EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
+			
+			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = linear_time*1000;
+			printf("%f\n", linear_time);
 
             //now compute the intersecting cells for this motion (including ignoring the source footprint)
             get_2d_motion_cells(EnvNAVXYTHETALATCfg.FootprintPolygon, motionprimitiveV->at(mind).intermptV,

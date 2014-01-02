@@ -577,7 +577,7 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
     printf("solution size=%d\n", (unsigned int)xythetaPath.size());
     for (unsigned int i = 0; i < xythetaPath.size(); i++) {
-        fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+        fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, environment_navxythetalat.GetEnvNavConfig()->EnvHeight_c-xythetaPath.at(i).y, xythetaPath.at(i).theta);
     }
     fclose(fSol);
 
