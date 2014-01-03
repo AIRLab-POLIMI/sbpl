@@ -386,7 +386,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
         throw new SBPL_Exception();
     }
     EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
-
+	
     if (EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
         SBPL_ERROR("ERROR: illegal start coordinates\n");
         throw new SBPL_Exception();
