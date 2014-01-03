@@ -974,7 +974,6 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
             //EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
 			
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = linear_time*1000;
-			printf("%f\n", linear_time);
 
             //now compute the intersecting cells for this motion (including ignoring the source footprint)
             get_2d_motion_cells(EnvNAVXYTHETALATCfg.FootprintPolygon, motionprimitiveV->at(mind).intermptV,
