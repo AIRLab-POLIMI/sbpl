@@ -66,7 +66,7 @@ enum MainResultType
 
 	MAIN_RESULT_SUCCESS = 0,
 	MAIN_RESULT_FAILURE = 1,
-	MAIN_RESULT_INSUFFICIENT_ARGS = 2,
+	MAIN_RESULT_TOO_ARGS = 2,
 	MAIN_RESULT_INCORRECT_OPTIONS = 3,
 	MAIN_RESULT_UNSUPPORTED_ENV = 4,
 
@@ -757,9 +757,9 @@ int main(int argc, char *argv[])
 		PrintUsage(argv);
 		return MAIN_RESULT_SUCCESS;
 	}
-	else if (argc < 5) {
+	else if (argc != 1) {
 		PrintUsage(argv);
-		return MAIN_RESULT_INSUFFICIENT_ARGS;
+		return MAIN_RESULT_TOO_ARGS;
 	}
 
 	// Launch the correct example given the planner and an environment file.
