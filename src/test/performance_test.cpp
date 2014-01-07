@@ -28,6 +28,7 @@
 */
 
 #define PERFORMANCETEST_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
+#define NUMBER_OF_GOALS 2
 
 #include <cmath>
 #include <cstring>
@@ -97,9 +98,7 @@ void PrintUsage(char *argv[])
 	printf("See '%s -h' for help.\n", argv[0]);
 }
 
-int initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, MDPConfig * MDPCfg, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, completepose_t * goalpose, char * motionFileName, double cellsize_m){
-	int ret = 0;
-	
+DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, MDPConfig * MDPCfg, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, completepose_t * goalpose, char * motionFileName, double cellsize_m){
 	switch(envType){
 		case ENV_TYPE_XYTHETA:
 			environment = new EnvironmentNAVXYTHETALAT();
@@ -135,24 +134,22 @@ int initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envT
 			((EnvironmentNAVXYTHETAVSTEER *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		default:
-			ret = -1;
+			return 0;
 			break;
 	}
 	
-	return ret;
+	return environment;
 }
 
-int initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteSpaceInformation * environment, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, MDPConfig * MDPCfg){
-	int ret = 0;
-	
+SBPLPlanner * initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteSpaceInformation * environment, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, MDPConfig * MDPCfg){
 	switch(planType){
 		case PLANNER_TYPE_ARASTAR:
 			planner = new ARAPlanner(environment, bforwardsearch);
 			
+			planner->set_initialsolution_eps(initialEpsilon);
 			planner->set_start(MDPCfg->startstateid);
 			planner->set_goal(MDPCfg->goalstateid);
 			planner->set_search_mode(bsearchuntilfirstsolution);
-			planner->set_initialsolution_eps(initialEpsilon);
 			break;
 		case PLANNER_TYPE_ANASTARDOUBLE:
 			planner = new anaPlannerDouble(environment, bforwardsearch);
@@ -170,11 +167,11 @@ int initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteSpaceInform
 			planner->set_initialsolution_eps(initialEpsilon);
 			break;
 		default:
-			ret = -1;
+			return 0;
 			break;
 	}
 	
-	return ret;
+	return planner;
 }
 
 int saveSolution(DiscreteSpaceInformation * environment, EnvironmentType envType, vector<int> * solution_stateIDs_V){
@@ -415,14 +412,60 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 	return 0;
 }
 
-int planTest(char * occupancyFileName, char * startFileName, char * goalsFileName){
+int executePlan(EnvironmentType envType, PlannerType planType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, vector<completepose_t> * goalposes, char * motionFileName, double cellsize_m, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, double allocated_time_secs_foreachplan){
 	DiscreteSpaceInformation * environment;
-	SBPLPlanner * planner;
+	SBPLPlanner * planner = NULL;
 	
+	for(int i=0;i<goalposes->size();i++){
+		MDPConfig MDPCfg;
+		
+		environment = initEnvironment(environment, envType, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, velocities, &MDPCfg, perimeterptsV, startpose, &goalposes->at(i), "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m);
+		planner = initPlanner(planner, planType, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
+		
+		vector<int> solution_stateIDs_V;
+		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
+		
+		if(bret){
+			printf("Solution found for goal %d with xytheta...\n", i);
+		}
+		else{
+			printf("Solution not found for goal %d with xytheta...\n", i);
+		}
+		
+		saveSolution(environment, envType, &solution_stateIDs_V);
+		
+		delete planner;
+		delete environment;
+		
+		moveFiles(envType, planType, i, bret);
+	}
+}
+
+vector<sbpl_2Dpt_t> createPerimeters(double halflength, double halfwidth){
+	vector<sbpl_2Dpt_t> perimeterptsV;
+	sbpl_2Dpt_t pt_m;
+	
+	pt_m.x = -halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = -halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	
+	return perimeterptsV;
+}
+
+int planTest(char * occupancyFileName, char * startFileName, char * goalsFileName){
 	//Set various parameters for various environments
 	int obsthresh = 1;
 	int cost_inscribed_thresh = 1;
-	int cost_possibly_circumscribed_thresh = 1;
+	int cost_possibly_circumscribed_thresh = 0;
 	int cellsize_m = 1;
 	double nominalvel = 3.0;
 	double timetoturn = 1000000;
@@ -451,10 +494,10 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	fscanf(occupancyFile, "%d", &width);
 	map = new unsigned char[width * height];
 	int i = 0;
-	while(!feof(occupancyFile)){
-		char c;
-		fscanf(occupancyFile, "%c", &c);
-		if(c == '0' || c == '1'){
+	while(!feof(occupancyFile) && i < width*height){
+		int c;
+		fscanf(occupancyFile, "%d", &c);
+		if(c == 0 || c == 1){
 			map[i] = c;
 			i++;
 		}
@@ -462,30 +505,33 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	
 	fclose(occupancyFile);
 	
-	//Read all start states
+	//Read start state
 	completepose_t startpose;
+	float dTemp;
 	occupancyFile = fopen(startFileName, "r");
 	
-	fscanf(occupancyFile, "%f", &(startpose.x));
-	fscanf(occupancyFile, "%f", &(startpose.y));
-	fscanf(occupancyFile, "%f", &(startpose.theta));
-	fscanf(occupancyFile, "%f", &(startpose.v));
-	fscanf(occupancyFile, "%f", &(startpose.steer));
+	fscanf(occupancyFile, "%lf", &(startpose.x));
+	fscanf(occupancyFile, "%lf", &(startpose.y));
+	fscanf(occupancyFile, "%lf", &(startpose.theta));
+	fscanf(occupancyFile, "%lf", &(startpose.v));
+	fscanf(occupancyFile, "%lf", &(startpose.steer));
 	
 	fclose(occupancyFile);
 	
 	//Read all end states
 	vector<completepose_t> goalposes;
 	occupancyFile = fopen(goalsFileName, "r");
+	int contgoals = 0;
 	
-	while(!feof(occupancyFile)){
+	while(!feof(occupancyFile) && contgoals < NUMBER_OF_GOALS){
 		completepose_t temppose;
-		fscanf(occupancyFile, "%f", &(temppose.x));
-		fscanf(occupancyFile, "%f", &(temppose.y));
-		fscanf(occupancyFile, "%f", &(temppose.theta));
-		fscanf(occupancyFile, "%f", &(temppose.v));
-		fscanf(occupancyFile, "%f", &(temppose.steer));
+		fscanf(occupancyFile, "%lf", &(temppose.x));
+		fscanf(occupancyFile, "%lf", &(temppose.y));
+		fscanf(occupancyFile, "%lf", &(temppose.theta));
+		fscanf(occupancyFile, "%lf", &(temppose.v));
+		fscanf(occupancyFile, "%lf", &(temppose.steer));
 		goalposes.push_back(temppose);
+		contgoals++;
 	}
 	
 	fclose(occupancyFile);
@@ -495,250 +541,36 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	double initialEpsilon = 3.0;
 	bool bsearchuntilfirstsolution = false;
 	bool bforwardsearch = true;
-
+	
 	// set the perimeter of the robot
-	// it is given with 0, 0, 0 robot ref. point for which planning is done.
-	vector<sbpl_2Dpt_t> perimeterptsV;
-	sbpl_2Dpt_t pt_m;
-	double halfwidth = 1;
-	double halflength = 1;
-	pt_m.x = -halflength;
-	pt_m.y = -halfwidth;
-	perimeterptsV.push_back(pt_m);
-	pt_m.x = halflength;
-	pt_m.y = -halfwidth;
-	perimeterptsV.push_back(pt_m);
-	pt_m.x = halflength;
-	pt_m.y = halfwidth;
-	perimeterptsV.push_back(pt_m);
-	pt_m.x = -halflength;
-	pt_m.y = halfwidth;
-	perimeterptsV.push_back(pt_m);
+	vector<sbpl_2Dpt_t> perimeterptsV = createPerimeters(1, 1);
 	
 	//ARA* and xyt
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETA, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ARASTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETA, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETA, PLANNER_TYPE_ARASTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xyt
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETA, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ANASTARDOUBLE, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETA, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETA, PLANNER_TYPE_ANASTARDOUBLE, i, bret);
-	}
-
+	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	
 	//AD* and xyt
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETA, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ADSTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETA, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytv
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAV, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ARASTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAV, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xytv
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAV, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ANASTARDOUBLE, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAV, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ANASTARDOUBLE, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 
 	//AD* and xytv
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAV, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ADSTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAV, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytvp
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAVSTEER, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ARASTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAVSTEER, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ARASTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xytvp
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAVSTEER, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ANASTARDOUBLE, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAVSTEER, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ANASTARDOUBLE, i, bret);
-	}
-
+	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	
 	//AD* and xyt
-	for(int i=0;i<goalposes.size();i++){
-		MDPConfig MDPCfg;
-		
-		initEnvironment(environment, ENV_TYPE_XYTHETAVSTEER, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &MDPCfg, &perimeterptsV, &startpose, &goalposes.at(i), "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m);
-		initPlanner(planner, PLANNER_TYPE_ADSTAR, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
-		
-		vector<int> solution_stateIDs_V;
-		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
-		
-		if(bret){
-			printf("Solution found for %d goal with xytheta...\n", i);
-		}
-		else{
-			printf("Solution not found for %d goal with xytheta...\n", i);
-		}
-		
-		saveSolution(environment, ENV_TYPE_XYTHETAVSTEER, &solution_stateIDs_V);
-		
-		delete planner;
-		delete environment;
-		
-		moveFiles(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, i, bret);
-	}
+	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	return 1;
 }
