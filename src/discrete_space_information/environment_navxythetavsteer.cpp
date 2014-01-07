@@ -398,7 +398,7 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 
-	//end(meters,rads,m/s):
+	//end(meters,rads,m/s,rads):
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
