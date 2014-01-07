@@ -2419,6 +2419,7 @@ void EnvironmentNAVXYTHETAVSTEER::SetConfiguration(int width, int height, const 
 	EnvNAVXYTHETAVSTEERCfg.StartX_c = startx;
 	EnvNAVXYTHETAVSTEERCfg.StartY_c = starty;
 	EnvNAVXYTHETAVSTEERCfg.StartTheta = starttheta;
+	EnvNAVXYTHETAVSTEERCfg.StartV = startv;
 	EnvNAVXYTHETAVSTEERCfg.StartSteer = startsteer;
 
 	if(!IsWithinMapCell(EnvNAVXYTHETAVSTEERCfg.StartX_c, EnvNAVXYTHETAVSTEERCfg.StartY_c)){

@@ -419,7 +419,7 @@ int executePlan(EnvironmentType envType, PlannerType planType, int width, int he
 	for(int i=0;i<goalposes->size();i++){
 		MDPConfig MDPCfg;
 		
-		environment = initEnvironment(environment, envType, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, velocities, &MDPCfg, perimeterptsV, startpose, &goalposes->at(i), "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m);
+		environment = initEnvironment(environment, envType, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, velocities, &MDPCfg, perimeterptsV, startpose, &goalposes->at(i), motionFileName, cellsize_m);
 		planner = initPlanner(planner, planType, environment, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, &MDPCfg);
 		
 		vector<int> solution_stateIDs_V;

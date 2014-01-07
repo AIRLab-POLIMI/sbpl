@@ -2308,6 +2308,7 @@ void EnvironmentNAVXYTHETAV::SetConfiguration(int width, int height, const unsig
 	EnvNAVXYTHETAVCfg.StartX_c = startx;
 	EnvNAVXYTHETAVCfg.StartY_c = starty;
 	EnvNAVXYTHETAVCfg.StartTheta = starttheta;
+	EnvNAVXYTHETAVCfg.StartV = startv;
 
 	if(!IsWithinMapCell(EnvNAVXYTHETAVCfg.StartX_c, EnvNAVXYTHETAVCfg.StartY_c)){
 		SBPL_ERROR("ERROR: illegal start coordinates\n");
