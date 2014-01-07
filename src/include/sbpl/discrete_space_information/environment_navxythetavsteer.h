@@ -401,7 +401,7 @@ public:
 	*         number of points in the input path. The returned coordinates are in
 	*         meters,meters,radians,m/s
 	*/
-	virtual void ConvertStateIDPathintoXYThetaVPath(std::vector<int>* stateIDPath, std::vector<sbpl_xy_theta_v_steer_pt_t>* xythetavPath);
+	virtual void ConvertStateIDPathintoXYThetaVSteerPath(std::vector<int>* stateIDPath, std::vector<sbpl_xy_theta_v_steer_pt_t>* xythetavPath);
 
 	~EnvironmentNAVXYTHETAVSTEER();
 

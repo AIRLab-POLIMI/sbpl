@@ -355,7 +355,7 @@ int planxythetavsteer(PlannerType plannerType, char* envCfgFilename, char* motPr
 	}
 	// write the continuous solution to file
 	vector<sbpl_xy_theta_v_steer_pt_t> xythetavsteerPath;
-	environment_navxythetavsteer.ConvertStateIDPathintoXYThetaVPath(&solution_stateIDs_V, &xythetavsteerPath);
+	environment_navxythetavsteer.ConvertStateIDPathintoXYThetaVSteerPath(&solution_stateIDs_V, &xythetavsteerPath);
 	printf("solution size=%d\n", (unsigned int)xythetavsteerPath.size());
 	for (unsigned int i = 0; i < xythetavsteerPath.size(); i++) {
 		fprintf(fSolC, "%.3f %.3f %.3f %.3f %.3f\n", xythetavsteerPath.at(i).x, xythetavsteerPath.at(i).y, xythetavsteerPath.at(i).theta, xythetavsteerPath.at(i).v, xythetavsteerPath.at(i).steer);
@@ -680,7 +680,7 @@ int planandnavigatexythetavsteer(PlannerType plannerType, char* envCfgFilename, 
 		fflush(fSol);
 
 		xythetavsteerPath.clear();
-		environment_navxythetavsteer.ConvertStateIDPathintoXYThetaVPath(&solution_stateIDs_V, &xythetavsteerPath);
+		environment_navxythetavsteer.ConvertStateIDPathintoXYThetaVSteerPath(&solution_stateIDs_V, &xythetavsteerPath);
 		printf("actual path (with intermediate poses) size=%d\n", (unsigned int)xythetavsteerPath.size());
 		for (unsigned int i = 0; i < xythetavsteerPath.size(); i++) {
 			fprintf(fSol, "%.3f %.3f %.3f %.3f %.3f\n", xythetavsteerPath.at(i).x, xythetavsteerPath.at(i).y, xythetavsteerPath.at(i).theta, xythetavsteerPath.at(i).v, xythetavsteerPath.at(i).steer);

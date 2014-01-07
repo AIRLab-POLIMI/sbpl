@@ -2242,7 +2242,7 @@ int EnvironmentNAVXYTHETAVSTEER::GetStateFromCoord(int x, int y, int theta, int 
 	return OutHashEntry->stateID;
 }
 
-void EnvironmentNAVXYTHETAVSTEER::ConvertStateIDPathintoXYThetaVPath(vector<int>* stateIDPath, vector<sbpl_xy_theta_v_steer_pt_t>* xythetavPath){
+void EnvironmentNAVXYTHETAVSTEER::ConvertStateIDPathintoXYThetaVSteerPath(vector<int>* stateIDPath, vector<sbpl_xy_theta_v_steer_pt_t>* xythetavPath){
 	vector<EnvNAVXYTHETAVSTEERAction_t*> actionV;
 	vector<int> CostV;
 	vector<int> SuccIDV;
