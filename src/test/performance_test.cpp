@@ -572,6 +572,8 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//AD* and xyt
 	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
+	delete [] map;
+	
 	return 1;
 }
 
