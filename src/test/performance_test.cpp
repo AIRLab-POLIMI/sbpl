@@ -101,6 +101,7 @@ void PrintUsage(char *argv[])
 DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, MDPConfig * MDPCfg, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, completepose_t * goalpose, char * motionFileName, double cellsize_m){
 	switch(envType){
 		case ENV_TYPE_XYTHETA:
+			printf("Environment: xytheta\n");
 			environment = new EnvironmentNAVXYTHETALAT();
 			
 			((EnvironmentNAVXYTHETALAT *)environment)->SetEnvParameter("cost_inscribed_thresh", cost_inscribed_thresh);
@@ -114,6 +115,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETALAT *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		case ENV_TYPE_XYTHETAV:
+			printf("Environment: xythetav\n");
 			environment = new EnvironmentNAVXYTHETAV();
 			
 			((EnvironmentNAVXYTHETAV *)environment)->InitializeEnv(width, height, numtheta, numV, *(velocities), map, startpose->x, startpose->y, startpose->theta, startpose->v, goalpose->x, goalpose->y, goalpose->theta, goalpose->v, *(perimeterptsV), cellsize_m, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, motionFileName);
@@ -124,6 +126,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETAV *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		case ENV_TYPE_XYTHETAVSTEER:
+			printf("Environment: xythetavsteer\n");
 			environment = new EnvironmentNAVXYTHETAVSTEER();
 			
 			((EnvironmentNAVXYTHETAVSTEER *)environment)->InitializeEnv(width, height, numtheta, numV, numSteers, *(velocities), map, startpose->x, startpose->y, startpose->theta, startpose->v, startpose->steer, goalpose->x, goalpose->y, goalpose->theta, goalpose->v, goalpose->steer, *(perimeterptsV), cellsize_m, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, motionFileName);
@@ -134,6 +137,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETAVSTEER *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		default:
+			printf("Environment: ???\n");
 			return 0;
 			break;
 	}
@@ -144,6 +148,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 SBPLPlanner * initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteSpaceInformation * environment, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, MDPConfig * MDPCfg){
 	switch(planType){
 		case PLANNER_TYPE_ARASTAR:
+			printf("Planner: ARA*\n");
 			planner = new ARAPlanner(environment, bforwardsearch);
 			
 			planner->set_initialsolution_eps(initialEpsilon);
@@ -152,6 +157,7 @@ SBPLPlanner * initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteS
 			planner->set_search_mode(bsearchuntilfirstsolution);
 			break;
 		case PLANNER_TYPE_ANASTARDOUBLE:
+			printf("Planner: ANA*\n");
 			planner = new anaPlannerDouble(environment, bforwardsearch);
 			
 			planner->set_start(MDPCfg->startstateid);
@@ -159,6 +165,7 @@ SBPLPlanner * initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteS
 			planner->set_search_mode(bsearchuntilfirstsolution);
 			break;
 		case PLANNER_TYPE_ADSTAR:
+			printf("Planner: AD*\n");
 			planner = new ADPlanner(environment, bforwardsearch);
 			
 			planner->set_start(MDPCfg->startstateid);
@@ -167,6 +174,7 @@ SBPLPlanner * initPlanner(SBPLPlanner * planner, PlannerType planType, DiscreteS
 			planner->set_initialsolution_eps(initialEpsilon);
 			break;
 		default:
+			printf("Planner: ???\n");
 			return 0;
 			break;
 	}
@@ -426,10 +434,10 @@ int executePlan(EnvironmentType envType, PlannerType planType, int width, int he
 		int bret = planner->replan(allocated_time_secs_foreachplan, &solution_stateIDs_V);
 		
 		if(bret){
-			printf("Solution found for goal %d with xytheta...\n", i);
+			printf("Solution found for goal %d...\n", i);
 		}
 		else{
-			printf("Solution not found for goal %d with xytheta...\n", i);
+			printf("Solution not found for goal...\n", i);
 		}
 		
 		saveSolution(environment, envType, &solution_stateIDs_V);
