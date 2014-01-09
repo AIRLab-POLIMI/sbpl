@@ -954,6 +954,23 @@ void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_t
     get_2d_motion_cells(polygon, ps, cells, res);
 }
 
+void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_v_omega_pt_t> poses, 
+						 std::vector<sbpl_2Dcell_t>* cells, double res)
+{
+	vector<sbpl_xy_theta_pt_t> ps;
+
+    //call get footprint on the rest of the points
+    for (int i = 0; i < poses.size(); i++) {
+		sbpl_xy_theta_pt_t tmp;
+		tmp.x=poses.at(i).x;
+		tmp.y=poses.at(i).y;
+		tmp.theta=poses.at(i).theta;
+		ps.push_back(tmp);
+    }
+
+    get_2d_motion_cells(polygon, ps, cells, res);
+}
+
 //This function is inefficient and should be avoided if possible (you should
 //use overloaded functions that uses a set for the cells)!
 void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
@@ -986,6 +1003,18 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* 
 
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
                             sbpl_xy_theta_v_steer_pt_t pose, double res)
+{
+	sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
+}
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
+                            sbpl_xy_theta_v_omega_pt_t pose, double res)
 {
 	sbpl_xy_theta_pt_t p;
 	
@@ -1139,6 +1168,18 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cel
 }
 
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_steer_pt_t pose,
+                            double res)
+{
+	sbpl_xy_theta_pt_t p;
+	
+	p.x=pose.x;
+	p.y=pose.y;
+	p.theta=pose.theta;
+	
+	get_2d_footprint_cells(polygon, cells, p, res);
+}
+
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_v_omega_pt_t pose,
                             double res)
 {
 	sbpl_xy_theta_pt_t p;

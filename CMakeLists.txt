@@ -14,6 +14,7 @@ add_library(sbpl SHARED
   src/discrete_space_information/environment_robarm.cpp
   src/discrete_space_information/environment_navxythetav.cpp
   src/discrete_space_information/environment_navxythetavsteer.cpp
+  src/discrete_space_information/environment_navxythetavomega.cpp
   src/planners/araplanner.cpp
   src/planners/adplanner.cpp
   src/planners/viplanner.cpp
