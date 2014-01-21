@@ -107,10 +107,10 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETALAT *)environment)->SetEnvParameter("cost_inscribed_thresh", cost_inscribed_thresh);
 			((EnvironmentNAVXYTHETALAT *)environment)->SetEnvParameter("cost_possibly_circumscribed_thresh", cost_possibly_circumscribed_thresh);
 			
-			((EnvironmentNAVXYTHETALAT *)environment)->InitializeEnv(width, height, map, startpose->x, height-startpose->y, startpose->theta, goalpose->x, height-goalpose->y, goalpose->theta, 0, 0, 0, *(perimeterptsV), cellsize_m, nominalvel, timetoturn, obsthresh, motionFileName);
+			((EnvironmentNAVXYTHETALAT *)environment)->InitializeEnv(width, height, map, startpose->x, startpose->y, startpose->theta, goalpose->x, height-goalpose->y, goalpose->theta, 0, 0, 0, *(perimeterptsV), cellsize_m, nominalvel, timetoturn, obsthresh, motionFileName);
 			
-			((EnvironmentNAVXYTHETALAT *)environment)->SetStart(startpose->x, height-startpose->y, startpose->theta);
-			((EnvironmentNAVXYTHETALAT *)environment)->SetGoal(goalpose->x, height-goalpose->y, goalpose->theta);
+			((EnvironmentNAVXYTHETALAT *)environment)->SetStart(startpose->x, startpose->y, startpose->theta);
+			((EnvironmentNAVXYTHETALAT *)environment)->SetGoal(goalpose->x, goalpose->y, goalpose->theta);
 			
 			((EnvironmentNAVXYTHETALAT *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
@@ -200,7 +200,7 @@ int saveSolution(DiscreteSpaceInformation * environment, EnvironmentType envType
 			height = ((EnvironmentNAVXYTHETALAT *)environment)->GetEnvNavConfig()->EnvHeight_c;
 			((EnvironmentNAVXYTHETALAT *)environment)->ConvertStateIDPathintoXYThetaPath(solution_stateIDs_V, &xythetaPath);
 			for (unsigned int i = 0; i < xythetaPath.size(); i++) {
-				fprintf(fSolC, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, height-xythetaPath.at(i).y, xythetaPath.at(i).theta);
+				fprintf(fSolC, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
 			}
 			break;
 		case ENV_TYPE_XYTHETAV:

@@ -191,7 +191,8 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const
     else {
         for (int y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
             for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
-                EnvNAVXYTHETALATCfg.Grid2D[x][y] = mapdata[x + y * width];
+				EnvNAVXYTHETALATCfg.Grid2D[x][EnvNAVXYTHETALATCfg.EnvHeight_c-1-y] = mapdata[x + y * width];
+                //EnvNAVXYTHETALATCfg.Grid2D[x][y] = mapdata[x + y * width];
             }
         }
     }
@@ -446,12 +447,14 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
         SBPL_ERROR("ERROR: ran out of env file early\n");
         throw new SBPL_Exception();
     }
-    for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++)
+    //for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++)
+    for (y = EnvNAVXYTHETALATCfg.EnvHeight_c-1; y >= 0; y--)
         for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             if (fscanf(fCfg, "%d", &dTemp) != 1) {
                 SBPL_ERROR("ERROR: incorrect format of config file\n");
                 throw new SBPL_Exception();
             }
+            //EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
             EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
         }
 }
@@ -1788,11 +1791,17 @@ bool EnvironmentNAVXYTHETALATTICE::SetMap(const unsigned char* mapdata)
 {
     int xind = -1, yind = -1;
 
-    for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
+    /*for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
         for (yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
             EnvNAVXYTHETALATCfg.Grid2D[xind][yind] = mapdata[xind + yind * EnvNAVXYTHETALATCfg.EnvWidth_c];
         }
-    }
+    }*/
+	
+	for (int xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
+		for (int yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
+			EnvNAVXYTHETALATCfg.Grid2D[xind][EnvNAVXYTHETALATCfg.EnvHeight_c-1-yind] = mapdata[xind + yind * EnvNAVXYTHETALATCfg.EnvWidth_c];
+		}
+	}
 
     bNeedtoRecomputeStartHeuristics = true;
     bNeedtoRecomputeGoalHeuristics = true;
