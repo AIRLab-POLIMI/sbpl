@@ -226,10 +226,10 @@ void SBPL2DGridSearch::computedxy()
         if (dx_[dind] != 0 && dy_[dind] != 0) {
             if (dind <= 7)
                 //the cost of a diagonal move in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1414); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1000);//1414); 
             else
                 //the cost of a move to 1,2 or 2,1 or so on in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2236); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2000);//2236); 
         }
         else
             dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1000); //the cost of a horizontal move in millimeters
