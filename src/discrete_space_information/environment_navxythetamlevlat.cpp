@@ -155,9 +155,9 @@ bool EnvironmentNAVXYTHETAMLEVLAT::IsObstacle(int X, int Y, int levind)
 }
 
 // returns the maximum over all levels of the cost corresponding to the cell <x,y>
-unsigned char EnvironmentNAVXYTHETAMLEVLAT::GetMapCost(int X, int Y)
+double EnvironmentNAVXYTHETAMLEVLAT::GetMapCost(int X, int Y)
 {
-    unsigned char mapcost = EnvNAVXYTHETALATCfg.Grid2D[X][Y];
+    unsigned char mapcost = (unsigned char)(EnvNAVXYTHETALATCfg.Grid2D[X][Y]);
 
     for (int levind = 0; levind < numofadditionalzlevs; levind++) {
         mapcost = __max(mapcost, AddLevelGrid2D[levind][X][Y]);

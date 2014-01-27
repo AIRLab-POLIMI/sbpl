@@ -164,6 +164,7 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 	char sTemp[1024], sTemp1[1024];
 	int dTemp;
 	int x, y;
+	double fTemp;
 
 	//discretization(cells)
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
@@ -451,9 +452,9 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 	}
 
 	//allocate the 2D environment
-	EnvNAVXYTHETAVSTEERCfg.Grid2D = new unsigned char*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
+	EnvNAVXYTHETAVSTEERCfg.Grid2D = new double*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
 	for (x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
-		EnvNAVXYTHETAVSTEERCfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
+		EnvNAVXYTHETAVSTEERCfg.Grid2D[x] = new double[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
 	}
 
 	//environment:
@@ -464,11 +465,11 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 	
 	for (y = EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1; y >= 0; y--)
 		for (x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
-			if (fscanf(fCfg, "%d", &dTemp) != 1) {
+			if (fscanf(fCfg, "%lf", &fTemp) != 1) {
 				SBPL_ERROR("ERROR: incorrect format of config file\n");
 				throw new SBPL_Exception();
 			}
-			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] = dTemp;
+			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] = fTemp;
 		}
 	
 	if(!IsValidConfiguration(EnvNAVXYTHETAVSTEERCfg.StartX_c, EnvNAVXYTHETAVSTEERCfg.StartY_c, EnvNAVXYTHETAVSTEERCfg.StartTheta, EnvNAVXYTHETAVSTEERCfg.StartV, EnvNAVXYTHETAVSTEERCfg.StartSteer)){
@@ -1319,7 +1320,20 @@ bool EnvironmentNAVXYTHETAVSTEER::ReadSinglePose(sbpl_xy_theta_v_steer_pt_t* pos
 
 void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 	if (bNeedtoRecomputeStartHeuristics && !bGoalHeuristics) {
-		grid2Dsearchfromstart->search(EnvNAVXYTHETAVSTEERCfg.Grid2D, EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh,
+		//Create temporary map
+		unsigned char ** map;
+	
+		map = new unsigned char*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
+		for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
+			map[x] = new unsigned char[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
+		}
+		
+		for (int y = EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1; y >= 0; y--)
+			for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
+				map[x][y] = (int)(EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
+			}
+		
+		grid2Dsearchfromstart->search(map, EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh,
 									EnvNAVXYTHETAVSTEERCfg.StartX_c, EnvNAVXYTHETAVSTEERCfg.StartY_c,
 									EnvNAVXYTHETAVSTEERCfg.EndX_c, EnvNAVXYTHETAVSTEERCfg.EndY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
@@ -1332,10 +1346,28 @@ void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.EndX_c,
 																				EnvNAVXYTHETAVCfg.EndY_c)));*/
+		
+		//Destroy temporary map
+		for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++)
+			delete[] map[x];
+		delete[] map;
 	}
 
 	if (bNeedtoRecomputeGoalHeuristics && bGoalHeuristics) {
-		grid2Dsearchfromgoal->search(EnvNAVXYTHETAVSTEERCfg.Grid2D, EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh,
+		//Create temporary map
+		unsigned char ** map;
+	
+		map = new unsigned char*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
+		for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
+			map[x] = new unsigned char[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
+		}
+		
+		for (int y = EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1; y >= 0; y--)
+			for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
+				map[x][y] = (int)(EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
+			}
+			
+		grid2Dsearchfromgoal->search(map, EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh,
 									EnvNAVXYTHETAVSTEERCfg.EndX_c, EnvNAVXYTHETAVSTEERCfg.EndY_c,
 									EnvNAVXYTHETAVSTEERCfg.StartX_c, EnvNAVXYTHETAVSTEERCfg.StartY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
@@ -1349,6 +1381,11 @@ void EnvironmentNAVXYTHETAVSTEER::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.StartX_c,
 																				EnvNAVXYTHETAVCfg.StartY_c)));*/
+		
+		//Destroy temporary map
+		for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++)
+			delete[] map[x];
+		delete[] map;
 	}
 }
 
@@ -1837,7 +1874,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintEnv_Config(FILE* fOut)
 		
 		for (int y = EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
-				fprintf(fOut, "%d ", EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
+				fprintf(fOut, "%lf ", EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
 			}
 			
 			fprintf(fOut, "\n");
@@ -1863,7 +1900,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintEnv_Config(FILE* fOut)
 		
 		for (int y = EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
-				printf("%d ", EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
+				printf("%lf ", EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y]);
 			}
 			
 			printf("\n");
@@ -1873,7 +1910,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintEnv_Config(FILE* fOut)
 }
 
 bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(int width, int height, int numthetadirs, int numv, int numsteers, vector<double> velocities,
-							const unsigned char* mapdata,
+							const double* mapdata,
 							double startx, double starty, double starttheta, double startv, double startsteer,
 							double goalx, double goaly, double goaltheta, double goalv, double goalsteer,
 							const vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
@@ -1938,7 +1975,7 @@ bool EnvironmentNAVXYTHETAVSTEER::InitializeEnv(int width, int height, int numth
 	return true;
 }
 
-bool EnvironmentNAVXYTHETAVSTEER::UpdateCost(int x, int y, unsigned char newcost){
+bool EnvironmentNAVXYTHETAVSTEER::UpdateCost(int x, int y, double newcost){
 	EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] = newcost;
 
 	bNeedtoRecomputeStartHeuristics = true;
@@ -1947,7 +1984,7 @@ bool EnvironmentNAVXYTHETAVSTEER::UpdateCost(int x, int y, unsigned char newcost
 	return true;
 }
 
-bool EnvironmentNAVXYTHETAVSTEER::SetMap(const unsigned char* mapdata){
+bool EnvironmentNAVXYTHETAVSTEER::SetMap(const double* mapdata){
 	for (int xind = 0; xind < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; xind++) {
 		for (int yind = 0; yind < EnvNAVXYTHETAVSTEERCfg.EnvHeight_c; yind++) {
 			EnvNAVXYTHETAVSTEERCfg.Grid2D[xind][EnvNAVXYTHETAVSTEERCfg.EnvHeight_c-1-yind] = mapdata[xind + yind * EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
@@ -2024,7 +2061,7 @@ void EnvironmentNAVXYTHETAVSTEER::GetSuccsOfChangedEdges(vector<sbpl_2Dcell_t> c
 }
 
 bool EnvironmentNAVXYTHETAVSTEER::IsObstacle(int x, int y){
-	return (EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] >= EnvNAVXYTHETAVSTEERCfg.obsthresh);
+	return (EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] >= (double)(EnvNAVXYTHETAVSTEERCfg.obsthresh));
 }
 
 bool EnvironmentNAVXYTHETAVSTEER::IsValidConfiguration(int x, int y, int theta, int v, int steer){
@@ -2047,7 +2084,7 @@ bool EnvironmentNAVXYTHETAVSTEER::IsValidConfiguration(int x, int y, int theta, 
 		int y = footprint.at(find).y;
 
 		if (x < 0 || x >= EnvNAVXYTHETAVSTEERCfg.EnvWidth_c || y < 0 || y >= EnvNAVXYTHETAVSTEERCfg.EnvHeight_c ||
-			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] >= EnvNAVXYTHETAVSTEERCfg.obsthresh)
+			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] >= (double)(EnvNAVXYTHETAVSTEERCfg.obsthresh))
 		{
 			return false;
 		}
@@ -2108,7 +2145,7 @@ void EnvironmentNAVXYTHETAVSTEER::PrintTimeStat(FILE* fOut){
 	/*TO BE IMPLEMENTED*/
 }
 
-unsigned char EnvironmentNAVXYTHETAVSTEER::GetMapCost(int x, int y){
+double EnvironmentNAVXYTHETAVSTEER::GetMapCost(int x, int y){
 	return EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y];
 }
 
@@ -2320,7 +2357,7 @@ void EnvironmentNAVXYTHETAVSTEER::ConvertStateIDPathintoXYThetaVSteerPath(vector
 #if DEBUG
 			int nx = CONTXY2DISC(intermpt.x, EnvNAVXYTHETAVSTEERCfg.cellsize_m);
 			int ny = CONTXY2DISC(intermpt.y, EnvNAVXYTHETAVSTEERCfg.cellsize_m);
-			SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f %.3f %.3f (%d %d %d %d %d cost=%d) ",
+			SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f %.3f %.3f (%d %d %d %d %d cost=%lf) ",
 				intermpt.x, intermpt.y, intermpt.theta, intermpt.v, intermpt.steer
 				nx, ny, ContTheta2DiscNotUnif(intermpt.theta, EnvNAVXYTHETAVSTEERCfg.NumThetaDirs),
 				ContV2Disc(intermpt.v, EnvNAVXYTHETAVSTEERCfg.velocities), ContSteer2Disc(intermpt.steerm EnvNAVXYTHETAVSTEERCfg.numSteers), EnvNAVXYTHETAVSTEERCfg.Grid2D[nx][ny]);
@@ -2343,7 +2380,7 @@ double EnvironmentNAVXYTHETAVSTEER::EuclideanDistance_m(int x1, int y1, int x2, 
 
 bool EnvironmentNAVXYTHETAVSTEER::IsValidCell(int x, int y){
 	return (x >= 0 && x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c && y >= 0 && y < EnvNAVXYTHETAVSTEERCfg.EnvHeight_c &&
-			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] < EnvNAVXYTHETAVSTEERCfg.obsthresh);
+			EnvNAVXYTHETAVSTEERCfg.Grid2D[x][y] < (double)(EnvNAVXYTHETAVSTEERCfg.obsthresh));
 }
 
 int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sourceTheta, int sourceV, int sourceSteer, EnvNAVXYTHETAVSTEERAction_t* action){
@@ -2359,13 +2396,13 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 	if (!IsValidCell(sourceX + action->dX, sourceY + action->dY)) return INFINITECOST;
 
 	if (EnvNAVXYTHETAVSTEERCfg.Grid2D[sourceX + action->dX][sourceY + action->dY] >=
-		EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh) 
+		(double)(EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh)) 
 	{
 		return INFINITECOST;
 	}
 
 	//need to iterate over discretized center cells and compute cost based on them
-	unsigned char maxcellcost = 0;
+	double maxcellcost = 0;
 	for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
 		interm5Dcell = action->interm3DcellsV.at(i);
 		interm5Dcell.x = interm5Dcell.x + sourceX;
@@ -2377,12 +2414,12 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 		maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[interm5Dcell.x][interm5Dcell.y]);
 
 		//check that the robot is NOT in the cell at which there is no valid orientation
-		if (maxcellcost >= EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh) return INFINITECOST;
+		if (maxcellcost >= (double)(EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh)) return INFINITECOST;
 	}
 
 	//check collisions that for the particular footprint orientation along the action
-	if (EnvNAVXYTHETAVSTEERCfg.FootprintPolygon.size() > 1 && (int)maxcellcost >=
-		EnvNAVXYTHETAVSTEERCfg.cost_possibly_circumscribed_thresh)
+	if (EnvNAVXYTHETAVSTEERCfg.FootprintPolygon.size() > 1 && maxcellcost >=
+		(double)(EnvNAVXYTHETAVSTEERCfg.cost_possibly_circumscribed_thresh))
 	{
 		checks++;
 
@@ -2405,13 +2442,13 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 
 	//to ensure consistency of h2D:
 	maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[sourceX][sourceY]);
-	int currentmaxcost =
+	double currentmaxcost =
 			(int)__max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
 			
-	return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
+	return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
 }
 
-void EnvironmentNAVXYTHETAVSTEER::SetConfiguration(int width, int height, const unsigned char * mapdata, int startx, int starty,
+void EnvironmentNAVXYTHETAVSTEER::SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,
 								int starttheta, int startv, int startsteer, int goalx, int goaly, int goaltheta, int goalv, int goalsteer,
 							double cellsize_m, const vector<sbpl_2Dpt_t>& perimeterptsV){
 	EnvNAVXYTHETAVSTEERCfg.EnvWidth_c = width;
@@ -2467,9 +2504,9 @@ void EnvironmentNAVXYTHETAVSTEER::SetConfiguration(int width, int height, const 
 	EnvNAVXYTHETAVSTEERCfg.cellsize_m = cellsize_m;
 	
 	//allocate the 2D environment
-	EnvNAVXYTHETAVSTEERCfg.Grid2D = new unsigned char*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
+	EnvNAVXYTHETAVSTEERCfg.Grid2D = new double*[EnvNAVXYTHETAVSTEERCfg.EnvWidth_c];
 	for (int x = 0; x < EnvNAVXYTHETAVSTEERCfg.EnvWidth_c; x++) {
-		EnvNAVXYTHETAVSTEERCfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
+		EnvNAVXYTHETAVSTEERCfg.Grid2D[x] = new double[EnvNAVXYTHETAVSTEERCfg.EnvHeight_c];
 	}
 
 	//environment:

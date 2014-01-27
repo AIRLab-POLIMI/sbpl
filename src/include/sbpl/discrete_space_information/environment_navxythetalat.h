@@ -113,7 +113,7 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     int EndX_c;
     int EndY_c;
     int EndTheta;
-    unsigned char** Grid2D;
+    double** Grid2D;
 
     // the value at which and above which cells are obstacles in the maps sent from outside
     // the default is defined above
@@ -159,7 +159,7 @@ class EnvNAVXYTHETALAT_InitParms
 {
 public:
     unsigned int numThetas;
-    const unsigned char* mapdata;
+    const double* mapdata;
     double startx;
     double starty;
     double starttheta;
@@ -283,7 +283,7 @@ public:
      */
     virtual bool InitializeEnv(int width, int height,
                                /** if mapdata is NULL the grid is initialized to all freespace */
-                               const unsigned char* mapdata,
+                               const double* mapdata,
                                double startx, double starty, double starttheta,
                                double goalx, double goaly, double goaltheta,
                                double goaltol_x, double goaltol_y, double goaltol_theta,
@@ -304,13 +304,13 @@ public:
     /**
      * \brief update the traversability of a cell<x,y>
      */
-    virtual bool UpdateCost(int x, int y, unsigned char newcost);
+    virtual bool UpdateCost(int x, int y, double newcost);
 
     /**
      * \brief re-setting the whole 2D map
      *        transform from linear array mapdata to the 2D matrix used internally: Grid2D[x][y] = mapdata[x+y*width]
      */
-    virtual bool SetMap(const unsigned char* mapdata);
+    virtual bool SetMap(const double* mapdata);
 
     /**
      * \brief this function fill in Predecessor/Successor states of edges whose costs changed
@@ -371,7 +371,7 @@ public:
     /**
      * \brief returns the cost corresponding to the cell <x,y>
      */
-    virtual unsigned char GetMapCost(int x, int y);
+    virtual double GetMapCost(int x, int y);
 
     /**
      * \brief returns true if cell is within map
@@ -433,7 +433,7 @@ protected:
 
     virtual void SetConfiguration(int width, int height,
                                   /** if mapdata is NULL the grid is initialized to all freespace */
-                                  const unsigned char* mapdata,
+                                  const double* mapdata,
                                   int startx, int starty, int starttheta,
                                   int goalx, int goaly, int goaltheta,
                                   double cellsize_m, double nominalvel_mpersecs, double timetoturn45degsinplace_secs,

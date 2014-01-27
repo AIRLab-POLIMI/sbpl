@@ -98,7 +98,7 @@ void PrintUsage(char *argv[])
 	printf("See '%s -h' for help.\n", argv[0]);
 }
 
-DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, MDPConfig * MDPCfg, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, completepose_t * goalpose, char * motionFileName, double cellsize_m){
+DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environment, EnvironmentType envType, int width, int height, double * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, MDPConfig * MDPCfg, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, completepose_t * goalpose, char * motionFileName, double cellsize_m){
 	switch(envType){
 		case ENV_TYPE_XYTHETA:
 			printf("Environment: xytheta\n");
@@ -420,7 +420,7 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 	return 0;
 }
 
-int executePlan(EnvironmentType envType, PlannerType planType, int width, int height, unsigned char * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, vector<completepose_t> * goalposes, char * motionFileName, double cellsize_m, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, double allocated_time_secs_foreachplan){
+int executePlan(EnvironmentType envType, PlannerType planType, int width, int height, double * map, int obsthresh, int cost_inscribed_thresh, int cost_possibly_circumscribed_thresh, double nominalvel, double timetoturn, int numtheta, int numV, int numSteers, vector<double> * velocities, vector<sbpl_2Dpt_t> * perimeterptsV, completepose_t * startpose, vector<completepose_t> * goalposes, char * motionFileName, double cellsize_m, bool bforwardsearch, bool bsearchuntilfirstsolution, double initialEpsilon, double allocated_time_secs_foreachplan){
 	DiscreteSpaceInformation * environment;
 	SBPLPlanner * planner = NULL;
 	
@@ -492,7 +492,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//Read map used to test
 	int width;
 	int height;
-	unsigned char * map;
+	double * map;
 	FILE * occupancyFile = fopen(occupancyFileName, "r");
 	char temp[1024];
 	
@@ -500,11 +500,11 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	fscanf(occupancyFile, "%d", &height);
 	fscanf(occupancyFile, "%s", temp);
 	fscanf(occupancyFile, "%d", &width);
-	map = new unsigned char[width * height];
+	map = new double[width * height];
 	int i = 0;
 	while(!feof(occupancyFile) && i < width*height){
-		int c;
-		fscanf(occupancyFile, "%d", &c);
+		double c;
+		fscanf(occupancyFile, "%lf", &c);
 		if(c == 0 || c == 1){
 			map[i] = c;
 			i++;

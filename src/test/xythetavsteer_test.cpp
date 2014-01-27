@@ -475,7 +475,7 @@ int planandnavigatexythetavsteer(PlannerType plannerType, char* envCfgFilename, 
 		printf("true map:\n");
 		for (int y = 0; y < size_y; y++) {
 			for (int x = 0; x < size_x; x++) {
-				printf("%3d ", trueenvironment_navxythetavsteer.GetMapCost(x, y));
+				printf("%3lf ", trueenvironment_navxythetavsteer.GetMapCost(x, y));
 			}
 			printf("\n");
 		}
@@ -483,7 +483,7 @@ int planandnavigatexythetavsteer(PlannerType plannerType, char* envCfgFilename, 
 	}
 
 	// create an empty map
-	unsigned char* map = new unsigned char[size_x * size_y];
+	double* map = new double[size_x * size_y];
 	for (int i = 0; i < size_x * size_y; i++) {
 		map[i] = 0;
 	}
@@ -633,7 +633,7 @@ int planandnavigatexythetavsteer(PlannerType plannerType, char* envCfgFilename, 
 			if (map[index] != truecost) {
 				map[index] = truecost;
 				environment_navxythetavsteer.UpdateCost(x, y, map[index]);
-				printf("setting cost[%d][%d] to %d\n", x, y, map[index]);
+				printf("setting cost[%d][%d] to %lf\n", x, y, map[index]);
 				bChanges = true;
 				// store the changed cells
 				nav2dcell.x = x;

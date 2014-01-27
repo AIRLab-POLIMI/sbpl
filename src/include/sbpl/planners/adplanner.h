@@ -243,11 +243,21 @@ public:
      * \brief returns the value of the initial epsilon (suboptimality bound) used
      */
     virtual void set_initialsolution_eps(double initialsolution_eps) { finitial_eps = initialsolution_eps; }
+    
+    /**
+	 * \brief allow to set epsilon decrease value
+	 */
+    virtual void set_dec_eps(double val){dec_eps = val;};
 
     /**
      * \brief fills out a vector of stats from the search
      */
     virtual void get_search_stats(std::vector<PlannerStats>* s);
+	
+	/**
+	 * \brief allow a plan manually, maybe changing epsilon and start or goal between iterations
+	 */
+	virtual int single_plan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V, int* solcost);
 
     /**
      * \brief constructor
@@ -349,6 +359,9 @@ protected:
     virtual std::vector<int> GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, int& solcost);
 
     virtual bool Search(ADSearchStateSpace_t* pSearchStateSpace, std::vector<int>& pathIds, int & PathCost,
+                        bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
+	
+	virtual bool SingleSearch(ADSearchStateSpace_t* pSearchStateSpace, std::vector<int>& pathIds, int & PathCost,
                         bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 
     virtual CKey ComputeKey(ADState* state);

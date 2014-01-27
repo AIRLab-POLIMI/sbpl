@@ -33,7 +33,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-//#include <sstream>
+#include <sstream>
 
 using namespace std;
 
@@ -173,6 +173,24 @@ bool CheckIsNavigating(int numOptions, char** argv)
 {
 	for (int i = 1; i < numOptions + 1; i++) {
 		if (strcmp(argv[i], "-s") == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*******************************************************************************
+* CheckIsNavigating
+* @brief Returns whether the -m option is being used.
+*
+* @param numOptions The number of options passed through the command line
+* @param argv The command-line arguments
+* @return whether the -m option was passed in on the cmd line
+*******************************************************************************/
+bool CheckIsManual(int numOptions, char** argv)
+{
+	for (int i = 1; i < numOptions + 1; i++) {
+		if (strcmp(argv[i], "-m") == 0) {
 			return true;
 		}
 	}
@@ -413,6 +431,220 @@ int planxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFil
 }
 
 /*******************************************************************************
+* planmanualxythetav
+* @brief An example of planning in four-dimensional space (x,y,theta,v)
+*
+* @param plannerType The type of planner to be used in this example
+* @param envCfgFilename The environment config file. 
+* @param motPrimFilename The motion primitives file.
+* 
+* @return 1 if the planner successfully found a solution; 0 otherwise
+*******************************************************************************/
+int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motPrimFilename)
+{
+	int bRet = 0;
+	double allocated_time_secs = 1200.0; // in seconds
+	double initialEpsilon = 3.0;
+	double dec_eps = 0.1;
+	MDPConfig MDPCfg;
+	bool bsearchuntilfirstsolution = false;
+	bool bforwardsearch = false;
+
+	// set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
+	vector<sbpl_2Dpt_t> perimeterptsV;
+	sbpl_2Dpt_t pt_m;
+	double halfwidth = 1.0; //0.3;
+	double halflength = 1.0; //0.45;
+	pt_m.x = -halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = -halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+
+	// clear the footprint
+	//perimeterptsV.clear();
+
+	// Initialize Environment (should be called before initializing anything else)
+	EnvironmentNAVXYTHETAV environment_navxythetav;
+
+	if (!environment_navxythetav.InitializeEnv(envCfgFilename, perimeterptsV, motPrimFilename)) {
+		printf("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
+	}
+
+	// Initialize MDP Info
+	if (!environment_navxythetav.InitializeMDPCfg(&MDPCfg)) {
+		printf("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
+	}
+
+	// plan a path
+	vector<int> solution_stateIDs_V;
+
+	SBPLPlanner* planner = NULL;
+	switch (plannerType) {
+	case PLANNER_TYPE_ADSTAR:
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+		printf("Initializing ADPlanner...\n");
+#endif
+		planner = new ADPlanner(&environment_navxythetav, bforwardsearch);
+		planner->set_initialsolution_eps(initialEpsilon);
+		((ADPlanner*)planner)->set_dec_eps(dec_eps);
+		break;
+	default:
+		printf("Invalid planner type for this kind of planning...\n");
+		break;
+	}
+
+	// set planner properties
+	if (planner->set_start(MDPCfg.startstateid) == 0) {
+		printf("ERROR: failed to set start state\n");
+		throw new SBPL_Exception();
+	}
+	if (planner->set_goal(MDPCfg.goalstateid) == 0) {
+		printf("ERROR: failed to set goal state\n");
+		throw new SBPL_Exception();
+	}
+	
+	planner->set_search_mode(bsearchuntilfirstsolution);
+
+	// plan
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+	printf("start planning...\n");
+#endif
+	
+	int sc = 0;
+	bool ne = false;
+	bool flag = true;
+	while(planner->get_solution_eps() > 1 && !ne){
+		bRet = ((ADPlanner*)planner)->single_plan(allocated_time_secs, &solution_stateIDs_V, &sc);
+		
+		if(bRet){
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+			printf("solution cost = %d\n", sc);
+			printf("solution eps = %f\n", planner->get_solution_eps());
+#endif
+			stringstream str;
+		
+			str << "solContinuous" << (int)(planner->get_solution_eps()) << (int)((planner->get_solution_eps() - (int)(planner->get_solution_eps()))*10) << ".txt";
+			// write solution to file
+			FILE* fSolC = fopen(str.str().c_str(), "w");
+			if (fSolC == NULL) {
+				printf("ERROR: could not open solution file\n");
+				throw new SBPL_Exception();
+			}
+			// write the continuous solution to file
+			vector<sbpl_xy_theta_v_pt_t> xythetavPath;
+			environment_navxythetav.ConvertStateIDPathintoXYThetaVPath(&solution_stateIDs_V, &xythetavPath);
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+			printf("solution size=%d\n", (unsigned int)xythetavPath.size());
+#endif
+			for (unsigned int i = 0; i < xythetavPath.size(); i++) {
+				fprintf(fSolC, "%.3f %.3f %.3f %.3f\n", xythetavPath.at(i).x, xythetavPath.at(i).y, xythetavPath.at(i).theta, xythetavPath.at(i).v);
+			}
+			fclose(fSolC);
+		}
+		else{
+			ne = true;
+		}
+		
+		if(fabs(planner->get_solution_eps()-1.5) <= 0.001 && flag){
+			int newx, newy, newtheta, newv;
+			environment_navxythetav.GetCoordFromState(solution_stateIDs_V[49], newx, newy, newtheta, newv);
+			vector<double> velocities;
+			velocities.push_back(-9.0);
+			velocities.push_back(-3.0);
+			velocities.push_back(-1.5);
+			velocities.push_back(-0.0);
+			velocities.push_back(1.5);
+			velocities.push_back(3.0);
+			velocities.push_back(9.0);
+			
+			double startx = DISCXY2CONT(newx, 1);
+			double starty = DISCXY2CONT(newy, 1);
+			double starttheta = DiscTheta2Cont(newtheta, 16);
+			double startv = DiscV2Cont(newv, velocities);
+			
+			planner->set_initialsolution_eps(planner->get_solution_eps()-dec_eps);
+			int id = environment_navxythetav.SetStart(startx, starty, starttheta, startv);
+			planner->set_start(id);
+			flag = false;
+		}
+	}
+	
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+	printf("done planning\n");
+	printf("size of solution=%d\n", (unsigned int)solution_stateIDs_V.size());
+	printf("cost of solution=%d\n", sc);
+
+	environment_navxythetav.PrintTimeStat(stdout);
+#endif
+
+	// write solution to sol.txt
+	/*for(int contSols=0;contSols<((anaPlannerDouble*)planner)->sols.size();contSols++){
+		stringstream nomeSC;
+		nomeSC << "solContinuous" << contSols << ".txt";
+		FILE* fSolC = fopen(nomeSC.str().c_str(), "w");
+		if (fSolC == NULL) {
+			printf("ERROR: could not open solution file\n");
+			throw new SBPL_Exception();
+		}
+		// write the continuous solution to file
+		vector<sbpl_xy_theta_v_pt_t> xythetavPath;
+		environment_navxythetav.ConvertStateIDPathintoXYThetaVPath(&((anaPlannerDouble*)planner)->sols.at(contSols), &xythetavPath);
+		printf("solution size=%d\n", (unsigned int)xythetavPath.size());
+		for (unsigned int i = 0; i < xythetavPath.size(); i++) {
+			fprintf(fSolC, "%.3f %.3f %.3f %.3f\n", xythetavPath.at(i).x, xythetavPath.at(i).y, xythetavPath.at(i).theta, xythetavPath.at(i).v);
+		}
+		fclose(fSolC);
+	}*/
+
+	/*const char* solD = "solDiscrete.txt";
+	FILE* fSolD = fopen(solD, "w");
+	if (fSolD == NULL) {
+		printf("ERROR: could not open solution file\n");
+		throw new SBPL_Exception();
+	}
+	// write the discrete solution to file
+	for (size_t i = 0; i < solution_stateIDs_V.size(); i++) {
+		int x;
+		int y;
+		int theta;
+		int v;
+		environment_navxythetav.GetCoordFromState(solution_stateIDs_V[i], x, y, theta, v);
+	
+		fprintf(fSolD, "%d %d %d %d\t\t%.3f %.3f %.3f %.3f\n", x, y, theta, v,
+		DISCXY2CONT(x, environment_navxythetav.GetEnvNavConfig()->cellsize_m), DISCXY2CONT(y, environment_navxythetav.GetEnvNavConfig()->cellsize_m), DiscTheta2Cont(theta, environment_navxythetav.GetEnvNavConfig()->NumThetaDirs), DiscV2Cont(v, environment_navxythetav.GetEnvNavConfig()->velocities));
+	}
+	fclose(fSolD);*/
+	
+	//environment_navxythetav.PrintTimeStat(stdout);
+
+#if XYTHETAVTEST_PERFORMANCE_TEST == 1
+	if (bRet) {
+		// print the solution
+		printf("Solution is found\n");
+	}
+	else {
+		printf("Solution does not exist\n");
+	}
+#endif
+
+	fflush(NULL);
+
+	delete planner;
+
+	return bRet;
+}
+
+/*******************************************************************************
 * planandnavigatexythetav
 * @brief An example simulation of how a robot would use (x,y,theta,v) lattice
 *        planning.
@@ -488,7 +720,7 @@ int planandnavigatexythetav(PlannerType plannerType, char* envCfgFilename, char*
 		printf("true map:\n");
 		for (int y = 0; y < size_y; y++) {
 			for (int x = 0; x < size_x; x++) {
-				printf("%3d ", trueenvironment_navxythetav.GetMapCost(x, y));
+				printf("%3lf ", trueenvironment_navxythetav.GetMapCost(x, y));
 			}
 			printf("\n");
 		}
@@ -496,7 +728,7 @@ int planandnavigatexythetav(PlannerType plannerType, char* envCfgFilename, char*
 	}
 
 	// create an empty map
-	unsigned char* map = new unsigned char[size_x * size_y];
+	double* map = new double[size_x * size_y];
 	for (int i = 0; i < size_x * size_y; i++) {
 		map[i] = 0;
 	}
@@ -644,7 +876,7 @@ int planandnavigatexythetav(PlannerType plannerType, char* envCfgFilename, char*
 			if (map[index] != truecost) {
 				map[index] = truecost;
 				environment_navxythetav.UpdateCost(x, y, map[index]);
-				printf("setting cost[%d][%d] to %d\n", x, y, map[index]);
+				printf("setting cost[%d][%d] to %lf\n", x, y, map[index]);
 				bChanges = true;
 				// store the changed cells
 				nav2dcell.x = x;
@@ -826,6 +1058,7 @@ int main(int argc, char *argv[])
 	// Check command line arguments to find environment type and whether or not to
 	// use one of the navigating examples.
 	bool navigating = CheckIsNavigating(numOptions, argv);
+	bool manual = CheckIsManual(numOptions, argv);
 	std::string plannerType = CheckPlannerType(numOptions, argv);
 	std::string searchDir = CheckSearchDirection(numOptions, argv);
 
@@ -848,11 +1081,14 @@ int main(int argc, char *argv[])
 	int plannerRes = 0;
 	
 	if (navigating) {
-			plannerRes = planandnavigatexythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
-		}
-		else {
-			plannerRes = planxythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
-		}
+		plannerRes = planandnavigatexythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
+	}
+	else if (manual) {
+		plannerRes = planmanualxythetav(planner, argv[envArgIdx], motPrimFilename);
+	}
+	else {
+		plannerRes = planxythetav(planner, argv[envArgIdx], motPrimFilename, forwardSearch);
+	}
 
 	return plannerRes == 1 ? MAIN_RESULT_SUCCESS : MAIN_RESULT_FAILURE;
 }

@@ -140,7 +140,7 @@ public:
     /**
      * \brief returns the maximum over all levels of the cost corresponding to the cell <x,y>
      */
-    unsigned char GetMapCost(int X, int Y);
+    double GetMapCost(int X, int Y);
 
     /**
      * \brief returns the cost corresponding to the cell <x,y> at level levind

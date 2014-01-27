@@ -96,7 +96,7 @@ typedef struct ENV_NAVXYTHETAVSTEER_CONFIG
 	int EndTheta;
 	int EndV;
 	int EndSteer;
-	unsigned char ** Grid2D;
+	double ** Grid2D;
 	
 	/*
 	* the value at which and above which cells are obstacles in the maps sent from outside
@@ -289,7 +289,7 @@ public:
 	* \brief initialize environment by parameters.
 	*/
 	virtual bool InitializeEnv(int width, int height, int numthetadirs, int numv, int numsteers, std::vector<double> velocities,
-							const unsigned char* mapdata,
+							const double* mapdata,
 							double startx, double starty, double starttheta, double startv, double startsteer,
 							double goalx, double goaly, double goaltheta, double goalv, double goalsteer,
 							const std::vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
@@ -299,13 +299,13 @@ public:
 	/**
 	* \brief update the traversability of a cell<x,y>
 	*/
-	virtual bool UpdateCost(int x, int y, unsigned char newcost);
+	virtual bool UpdateCost(int x, int y, double newcost);
 	
 	/**
 	* \brief re-setting the whole 2D map. 
 	* 			The function transforms from linear array mapdata to the 2D matrix used internally: Grid2D[x][y] = mapdata[x+y*width]
 	*/
-	virtual bool SetMap(const unsigned char* mapdata);
+	virtual bool SetMap(const double* mapdata);
 	
 	/**
 	* \brief this function fill in Predecessor/Successor states of edges whose costs changed
@@ -357,7 +357,7 @@ public:
 	/**
 	* \brief returns the cost corresponding to the cell <x,y>
 	*/
-	virtual unsigned char GetMapCost(int x, int y);
+	virtual double GetMapCost(int x, int y);
 	
 	/**
 	* \brief returns true if cell is within map
@@ -455,7 +455,7 @@ protected:
 	virtual double EuclideanDistance_m(int x1, int y1, int x2, int y2);
 	virtual bool IsValidCell(int x, int y);
 	virtual int GetActionCost(int sourceX, int sourceY, int sourceTheta, int sourceV, int sourceSteer, EnvNAVXYTHETAVSTEERAction_t* action);
-	virtual void SetConfiguration(int width, int height, const unsigned char * mapdata, int startx, int starty,
+	virtual void SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,
 								int starttheta, int startv, int startsteer, int goalx, int goaly, int goaltheta, int goalv, int goalsteer,
 							double cellsize_m, const std::vector<sbpl_2Dpt_t>& perimeterptsV);
 };
