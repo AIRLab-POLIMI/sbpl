@@ -334,11 +334,19 @@ void ADPlanner::UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t*
 	ADState *predstate;
 
 	environment_->GetPreds(state->MDPstate->StateID, &PredIDV, &CostV);
+	int temp = 0;
+	
+// 	if(fabs(pSearchStateSpace->eps - 1.8)<=0.001 && state->MDPstate->StateID == 3485){
+// 		CMDPSTATE * st = GetState(6331, pSearchStateSpace);
+// 		//if(((ADState*)st->PlannerSpecificData)->heapindex == 0)
+// 		printf("\n\n\n%d\n\n\n%d\n\n\n", ComputeKey(((ADState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData))[0], ComputeKey(state)[0]);
+// 	}
 
 	//iterate through predecessors of s
 	for (int pind = 0; pind < (int)PredIDV.size(); pind++) {
 		CMDPSTATE* PredMDPState = GetState(PredIDV[pind], pSearchStateSpace);
 		predstate = (ADState*)(PredMDPState->PlannerSpecificData);
+		
 		if (predstate->callnumberaccessed != pSearchStateSpace->callnumber) {
 			ReInitializeSearchStateInfo(predstate, pSearchStateSpace);
 		}
@@ -352,11 +360,13 @@ void ADPlanner::UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t*
 				SBPL_FPRINTF(fDeb, "\n");
 			}
 #endif
-
+// 			if(state->MDPstate->StateID==6528 && predstate->MDPstate->StateID==6331)
+// 				printf("\n\n\n%d\n\n\n", predstate->g);
 			predstate->g = state->v + CostV[pind];
 			predstate->bestnextstate = state->MDPstate;
 			predstate->costtobestnextstate = CostV[pind];
-
+// 			if(state->MDPstate->StateID==6528 && predstate->MDPstate->StateID==6331)
+// 				printf("\n\n\n%d\n\n\n", predstate->g);
 			//update set membership
 			UpdateSetMembership(predstate);
 
@@ -369,6 +379,12 @@ void ADPlanner::UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t*
 #endif
 		}
 	} //for predecessors
+	
+// 	if(fabs(pSearchStateSpace->eps - 1.8)<=0.001 && state->MDPstate->StateID == 3485){
+// 		CMDPSTATE * st = GetState(6331, pSearchStateSpace);
+// 		//if(((ADState*)st->PlannerSpecificData)->heapindex == 0)
+// 			printf("\n\n\n%d\n\n\n%d\n\n\n", ComputeKey(((ADState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData))[0], ComputeKey(((ADState*)st->PlannerSpecificData))[0]);
+// 	}
 }
 
 //used for forward search

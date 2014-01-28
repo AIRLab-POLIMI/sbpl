@@ -786,7 +786,7 @@ void EnvironmentNAVXYTHETAV::PrecomputeActionswithCompleteMotionPrimitive(vector
 				*/
 				
 				//make the cost the max of the two times
-				element_to_add.cost = NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult;
+				element_to_add.cost = round(NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult);
 				//element_to_add.cost = NAVXYTHETAV_COSTMULT_MTOMM*(linear_distance/medium_velocity);
 				//double linear_distance_action = element_to_add.dX*element_to_add.dX + element_to_add.dY*element_to_add.dY;
 				//element_to_add.cost = (int)((linear_distance/linear_distance_action) * NAVXYTHETAV_COSTMULT_MTOMM * motionprimitiveV->at(mind).additionalactioncostmult);
@@ -1515,7 +1515,7 @@ int EnvironmentNAVXYTHETAV::GetGoalHeuristic(int stateID)
 																		EnvNAVXYTHETAVCfg.EndY_c));
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
-	return (int)(((double)__max(h2D, hEuclid)) / NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
 	//return (int)(((double)__max(h2D, hEuclid)));
 }
 
@@ -1540,7 +1540,7 @@ int EnvironmentNAVXYTHETAV::GetStartHeuristic(int stateID)
 																		HashEntry->y));
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
-	return (int)(((double)__max(h2D, hEuclid)) / NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
 	//return (int)(((double)__max(h2D, hEuclid)));
 }
 
@@ -1640,7 +1640,7 @@ void EnvironmentNAVXYTHETAV::GetSuccs(int sourceStateID, vector<int>* succIDV, v
 	//get X, Y for the state
 	EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[sourceStateID];
 	
-	int vector_index = (unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta;
+	int vector_index = HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+HashEntry->theta;
 
 	//iterate through actions
 	for (aind = 0; aind < EnvNAVXYTHETAVCfg.ActionsV->at(vector_index)->size(); aind++) {
@@ -1688,7 +1688,7 @@ void EnvironmentNAVXYTHETAV::GetPreds(int TargetStateID, vector<int>* PredIDV, v
 
 	//get X, Y for the state
 	EnvNAVXYTHETAVHashEntry_t* HashEntry = EnvNAVXYTHETAV.StateID2DataTable[TargetStateID];
-	int targetindex = (unsigned int)HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+(unsigned int)HashEntry->theta;
+	int targetindex = HashEntry->v*EnvNAVXYTHETAVCfg.NumThetaDirs+HashEntry->theta;
 
 	//clear the preds array
 	PredIDV->clear();
@@ -1704,7 +1704,7 @@ void EnvironmentNAVXYTHETAV::GetPreds(int TargetStateID, vector<int>* PredIDV, v
 
 		int predX = HashEntry->x - nav4daction->dX;
 		int predY = HashEntry->y - nav4daction->dY;
-		int predTheta = nav4daction->starttheta;
+		int predTheta = NORMALIZEDISCTHETA(nav4daction->starttheta, EnvNAVXYTHETAVCfg.NumThetaDirs);
 		int predV = nav4daction->startv;
 
 		//skip the invalid cells
@@ -2180,7 +2180,8 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 #endif
 
 	xythetavPath->clear();
-
+	//double sumcost = 0;
+	
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "converting stateid path into coordinates:\n");
 #endif
@@ -2198,7 +2199,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 		CostV.clear();
 		actionV.clear();
 		GetSuccs(sourceID, &SuccIDV, &CostV, &actionV);
-
+		
 		int bestcost = INFINITECOST;
 		int bestsind = -1;
 
@@ -2215,8 +2216,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 			GetCoordFromState(SuccIDV[sind], x_c, y_c, theta_c, v_c);
 			SBPL_FPRINTF(fDeb, "succ: %d %d %d %d\n", x_c, y_c, theta_c, v_c);
 #endif
-
-			if (SuccIDV[sind] == targetID && CostV[sind] <= bestcost) {
+			if (SuccIDV[sind] == targetID && CostV[sind] < bestcost) {
 				bestcost = CostV[sind];
 				bestsind = sind;
 			}
@@ -2229,6 +2229,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 						targettheta_c, targetv_c);
 			throw new SBPL_Exception();
 		}
+		//sumcost+=bestcost;
 
 		//now push in the actual path
 		//int sourcex_c, sourcey_c, sourcetheta_c;
@@ -2258,6 +2259,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 			xythetavPath->push_back(intermpt);
 		}
 	}
+	//printf("\n\n\n%f\n\n\n", sumcost);
 }
 
 /* Useful functions */

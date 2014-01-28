@@ -533,7 +533,7 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 #endif
 			stringstream str;
 		
-			str << "solContinuous" << (int)(planner->get_solution_eps()) << (int)((planner->get_solution_eps() - (int)(planner->get_solution_eps()))*10) << ".txt";
+			str << "solContinuous" << round(planner->get_solution_eps()*10) << ".txt";
 			// write solution to file
 			FILE* fSolC = fopen(str.str().c_str(), "w");
 			if (fSolC == NULL) {
@@ -555,28 +555,28 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 			ne = true;
 		}
 		
-		if(fabs(planner->get_solution_eps()-1.5) <= 0.001 && flag){
-			int newx, newy, newtheta, newv;
-			environment_navxythetav.GetCoordFromState(solution_stateIDs_V[49], newx, newy, newtheta, newv);
-			vector<double> velocities;
-			velocities.push_back(-9.0);
-			velocities.push_back(-3.0);
-			velocities.push_back(-1.5);
-			velocities.push_back(-0.0);
-			velocities.push_back(1.5);
-			velocities.push_back(3.0);
-			velocities.push_back(9.0);
-			
-			double startx = DISCXY2CONT(newx, 1);
-			double starty = DISCXY2CONT(newy, 1);
-			double starttheta = DiscTheta2Cont(newtheta, 16);
-			double startv = DiscV2Cont(newv, velocities);
-			
-			planner->set_initialsolution_eps(planner->get_solution_eps()-dec_eps);
-			int id = environment_navxythetav.SetStart(startx, starty, starttheta, startv);
-			planner->set_start(id);
-			flag = false;
-		}
+// 		if(fabs(planner->get_solution_eps()-1.5) <= 0.001 && flag){
+// 			int newx, newy, newtheta, newv;
+// 			environment_navxythetav.GetCoordFromState(solution_stateIDs_V[49], newx, newy, newtheta, newv);
+// 			vector<double> velocities;
+// 			velocities.push_back(-9.0);
+// 			velocities.push_back(-3.0);
+// 			velocities.push_back(-1.5);
+// 			velocities.push_back(-0.0);
+// 			velocities.push_back(1.5);
+// 			velocities.push_back(3.0);
+// 			velocities.push_back(9.0);
+// 			
+// 			double startx = DISCXY2CONT(newx, 1);
+// 			double starty = DISCXY2CONT(newy, 1);
+// 			double starttheta = DiscTheta2Cont(newtheta, 16);
+// 			double startv = DiscV2Cont(newv, velocities);
+// 			
+// 			planner->set_initialsolution_eps(planner->get_solution_eps()-dec_eps);
+// 			int id = environment_navxythetav.SetStart(startx, starty, starttheta, startv);
+// 			planner->set_start(id);
+// 			flag = false;
+// 		}
 	}
 	
 #if XYTHETAVTEST_PERFORMANCE_TEST == 0
