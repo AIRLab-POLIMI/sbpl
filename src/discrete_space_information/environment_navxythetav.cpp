@@ -2335,7 +2335,11 @@ int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTh
 	maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX][sourceY]);
 	double currentmaxcost =
 			(double)__max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
-			
+	
+	/*if(currentmaxcost >= 0.6 && (action->startv==0 || action->endv==EnvNAVXYTHETAVCfg.numV-1))
+		return INFINITECOST;
+	
+	return (int)((double)(action->cost) * (exp(currentmaxcost)));*/
 	return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
 }
 
