@@ -47,6 +47,8 @@ enum EnvironmentType
 	ENV_TYPE_XYTHETA,
 	ENV_TYPE_XYTHETAV,
 	ENV_TYPE_XYTHETAVSTEER,
+	ENV_TYPE_XYTHETAV_SAFE,
+	ENV_TYPE_XYTHETAVSTEER_SAFE,
 
     NUM_ENV_TYPES
 };
@@ -115,6 +117,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETALAT *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		case ENV_TYPE_XYTHETAV:
+		case ENV_TYPE_XYTHETAV_SAFE:
 			printf("Environment: xythetav\n");
 			environment = new EnvironmentNAVXYTHETAV();
 			
@@ -126,6 +129,7 @@ DiscreteSpaceInformation * initEnvironment(DiscreteSpaceInformation * environmen
 			((EnvironmentNAVXYTHETAV *)environment)->InitializeMDPCfg(MDPCfg);
 			break;
 		case ENV_TYPE_XYTHETAVSTEER:
+		case ENV_TYPE_XYTHETAVSTEER_SAFE:
 			printf("Environment: xythetavsteer\n");
 			environment = new EnvironmentNAVXYTHETAVSTEER();
 			
@@ -265,6 +269,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 				destSolPath << "./Performance/arastar/xythetav/" << i << "_Sol" << bret << ".txt";
 			}
 		}
+		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/arastar/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/arastar/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/arastar/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/arastar/xythetav_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetav_safe/" << i << "_Sol" << bret << ".txt";
+			}
+		}
 		else if(envType == ENV_TYPE_XYTHETAVSTEER){
 			if(i<10){
 				destPerfPath << "./Performance/arastar/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
@@ -281,6 +303,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 			else{
 				destPerfPath << "./Performance/arastar/xythetavsteer/" << i << "_Perf" << bret << ".txt";
 				destSolPath << "./Performance/arastar/xythetavsteer/" << i << "_Sol" << bret << ".txt";
+			}
+		}
+		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/arastar/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/arastar/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/arastar/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/arastar/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/arastar/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
 			}
 		}
 		else{
@@ -326,6 +366,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 				destSolPath << "./Performance/anastardouble/xythetav/" << i << "_Sol" << bret << ".txt";
 			}
 		}
+		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/anastardouble/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/anastardouble/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/anastardouble/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/anastardouble/xythetav_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetav_safe/" << i << "_Sol" << bret << ".txt";
+			}
+		}
 		else if(envType == ENV_TYPE_XYTHETAVSTEER){
 			if(i<10){
 				destPerfPath << "./Performance/anastardouble/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
@@ -342,6 +400,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 			else{
 				destPerfPath << "./Performance/anastardouble/xythetavsteer/" << i << "_Perf" << bret << ".txt";
 				destSolPath << "./Performance/anastardouble/xythetavsteer/" << i << "_Sol" << bret << ".txt";
+			}
+		}
+		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
 			}
 		}
 		else{
@@ -387,6 +463,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 				destSolPath << "./Performance/adstar/xythetav/" << i << "_Sol" << bret << ".txt";
 			}
 		}
+		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/adstar/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/adstar/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/adstar/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/adstar/xythetav_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetav_safe/" << i << "_Sol" << bret << ".txt";
+			}
+		}
 		else if(envType == ENV_TYPE_XYTHETAVSTEER){
 			if(i<10){
 				destPerfPath << "./Performance/adstar/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
@@ -403,6 +497,24 @@ int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
 			else{
 				destPerfPath << "./Performance/adstar/xythetavsteer/" << i << "_Perf" << bret << ".txt";
 				destSolPath << "./Performance/adstar/xythetavsteer/" << i << "_Sol" << bret << ".txt";
+			}
+		}
+		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
+			if(i<10){
+				destPerfPath << "./Performance/adstar/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<100){
+				destPerfPath << "./Performance/adstar/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
+			}
+			else if(i<1000){
+				destPerfPath << "./Performance/adstar/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
+			}
+			else{
+				destPerfPath << "./Performance/adstar/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
+				destSolPath << "./Performance/adstar/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
 			}
 		}
 		else{
@@ -483,7 +595,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	velocities.push_back(-9.0);
 	velocities.push_back(-3.0);
 	velocities.push_back(-1.5);
-	velocities.push_back(0.0);
+	velocities.push_back(0.1);
 	velocities.push_back(1.5);
 	velocities.push_back(3.0);
 	velocities.push_back(9.0);
@@ -554,13 +666,13 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	vector<sbpl_2Dpt_t> perimeterptsV = createPerimeters(1, 1);
 	
 	//ARA* and xyt
-	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xyt
-	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//AD* and xyt
-	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytv
 	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
@@ -579,6 +691,15 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	
 	//AD* and xytvp
 	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	
+	//ARA* and xytv_safe
+	executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	
+	//ANA* and xytv_safe
+	executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	
+	//AD* and xytv_safe
+	executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	delete [] map;
 	

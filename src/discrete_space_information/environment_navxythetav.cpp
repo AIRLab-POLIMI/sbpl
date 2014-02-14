@@ -368,7 +368,7 @@ void EnvironmentNAVXYTHETAV::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 	if (EnvNAVXYTHETAVCfg.StartV < 0 || EnvNAVXYTHETAVCfg.StartV >= EnvNAVXYTHETAVCfg.numV) {
-		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+		SBPL_ERROR("ERROR: illegal start coordinates for v\n");
 		throw new SBPL_Exception();
 	}
 
@@ -1017,7 +1017,7 @@ bool EnvironmentNAVXYTHETAV::ReadMotionPrimitives(FILE* fMotPrims){
 	}
 	for(int i=0;i<EnvNAVXYTHETAVCfg.numV;i++){
 		if (fscanf(fMotPrims, "%f", &fTemp) == 0) return false;
-		if (fTemp != EnvNAVXYTHETAVCfg.velocities[i]) {
+		if (round(fTemp*1000)/1000 != round(EnvNAVXYTHETAVCfg.velocities[i]*1000)/1000) {
 			SBPL_ERROR("ERROR: invalid velocity value %f velocity (instead of %f velocity) in the motion primitives file\n",
 					fTemp, EnvNAVXYTHETAVCfg.velocities[i]);
 			return false;
