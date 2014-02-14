@@ -2732,7 +2732,7 @@ int EnvironmentNAVXYTHETALAT::GetFromToHeuristic(int FromStateID, int ToStateID)
 
     return (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->X, FromHashEntry->Y, ToHashEntry->X,
                                                                     ToHashEntry->Y) /
-                 EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
+                 (EnvNAVXYTHETALATCfg.nominalvel_mpersecs+1));
 
 }
 
@@ -2757,7 +2757,7 @@ int EnvironmentNAVXYTHETALAT::GetGoalHeuristic(int stateID)
                                                                            EnvNAVXYTHETALATCfg.EndY_c));
 
     //define this function if it is used in the planner (heuristic backward search would use it)
-    return (int)(((double)__max(h2D, hEuclid)) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
+    return (int)(((double)__max(h2D, hEuclid)) / (EnvNAVXYTHETALATCfg.nominalvel_mpersecs+1));
 }
 
 int EnvironmentNAVXYTHETALAT::GetStartHeuristic(int stateID)
@@ -2780,7 +2780,7 @@ int EnvironmentNAVXYTHETALAT::GetStartHeuristic(int stateID)
                                                                            HashEntry->Y));
 
     //define this function if it is used in the planner (heuristic backward search would use it)
-    return (int)(((double)__max(h2D, hEuclid)) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
+    return (int)(((double)__max(h2D, hEuclid)) / (EnvNAVXYTHETALATCfg.nominalvel_mpersecs+1));
 }
 
 int EnvironmentNAVXYTHETALAT::SizeofCreatedEnv()

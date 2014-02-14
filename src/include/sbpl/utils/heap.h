@@ -34,7 +34,7 @@
 #include <sbpl/utils/key.h>
 
 //the maximum size of the heap
-#define HEAPSIZE 20000000 
+#define HEAPSIZE 200000000 
 #define HEAPSIZE_INIT 5000
 #define HEAP_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
 

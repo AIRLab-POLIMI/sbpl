@@ -33,7 +33,7 @@
 /**
  * \brief if set, then performance test are done and all *print* are avoided
  */
-#define GLOBAL_PERFORMANCE_TEST 0
+#define GLOBAL_PERFORMANCE_TEST 1
 
 /**
  * \brief if set, then heuristic is used if available

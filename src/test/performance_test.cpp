@@ -28,7 +28,7 @@
 */
 
 #define PERFORMANCETEST_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
-#define NUMBER_OF_GOALS 2
+#define NUMBER_OF_GOALS 100
 
 #include <cmath>
 #include <cstring>
@@ -437,7 +437,7 @@ int executePlan(EnvironmentType envType, PlannerType planType, int width, int he
 			printf("Solution found for goal %d...\n", i);
 		}
 		else{
-			printf("Solution not found for goal...\n", i);
+			printf("Solution not found for goal %d...\n", i);
 		}
 		
 		saveSolution(environment, envType, &solution_stateIDs_V);
@@ -545,7 +545,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	fclose(occupancyFile);
 	
 	//Set parameters for planner
-	double allocated_time_secs_foreachplan = 1200.0; // in seconds
+	double allocated_time_secs_foreachplan = 1500.0; // in seconds
 	double initialEpsilon = 3.0;
 	bool bsearchuntilfirstsolution = false;
 	bool bforwardsearch = true;
@@ -563,22 +563,22 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytv
-	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xytv
-	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 
 	//AD* and xytv
-	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytvp
-	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ANA* and xytvp
-	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
-	//AD* and xyt
-	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//AD* and xytvp
+	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	delete [] map;
 	
