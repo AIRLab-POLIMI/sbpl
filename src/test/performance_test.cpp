@@ -28,7 +28,7 @@
 */
 
 #define PERFORMANCETEST_PERFORMANCE_TEST GLOBAL_PERFORMANCE_TEST
-#define NUMBER_OF_GOALS 100
+#define NUMBER_OF_GOALS 70
 
 #include <cmath>
 #include <cstring>
@@ -208,12 +208,14 @@ int saveSolution(DiscreteSpaceInformation * environment, EnvironmentType envType
 			}
 			break;
 		case ENV_TYPE_XYTHETAV:
+		case ENV_TYPE_XYTHETAV_SAFE:
 			((EnvironmentNAVXYTHETAV *)environment)->ConvertStateIDPathintoXYThetaVPath(solution_stateIDs_V, &xythetavPath);
 			for (unsigned int i = 0; i < xythetavPath.size(); i++) {
 				fprintf(fSolC, "%.3f %.3f %.3f %.3f\n", xythetavPath.at(i).x, xythetavPath.at(i).y, xythetavPath.at(i).theta, xythetavPath.at(i).v);
 			}
 			break;
 		case ENV_TYPE_XYTHETAVSTEER:
+		case ENV_TYPE_XYTHETAVSTEER_SAFE:
 			((EnvironmentNAVXYTHETAVSTEER *)environment)->ConvertStateIDPathintoXYThetaVSteerPath(solution_stateIDs_V, &xythetavsteerPath);
 			for (unsigned int i = 0; i < xythetavsteerPath.size(); i++) {
 				fprintf(fSolC, "%.3f %.3f %.3f %.3f %.3f\n", xythetavsteerPath.at(i).x, xythetavsteerPath.at(i).y, xythetavsteerPath.at(i).theta, xythetavsteerPath.at(i).v, xythetavsteerPath.at(i).steer);
@@ -617,7 +619,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	while(!feof(occupancyFile) && i < width*height){
 		double c;
 		fscanf(occupancyFile, "%lf", &c);
-		if(c == 0 || c == 1){
+		if(c >= 0 && c <= 1){
 			map[i] = c;
 			i++;
 		}
