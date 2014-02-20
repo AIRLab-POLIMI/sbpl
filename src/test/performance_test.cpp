@@ -706,15 +706,17 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//AD* and xytv_safe
 	velocities.clear();
 	velocities.push_back(-9.0);
-        velocities.push_back(-3.0);
-        velocities.push_back(-1.5);
-        velocities.push_back(0.1);
-        velocities.push_back(1.5);
-        velocities.push_back(3.0);
-        velocities.push_back(9.0);
+	velocities.push_back(-3.0);
+	velocities.push_back(-1.5);
+	velocities.push_back(0.1);
+	velocities.push_back(1.5);
+	velocities.push_back(3.0);
+	velocities.push_back(9.0);
 
 	for(int contgoals=0;i<goalposes.size();contgoals++)
                 goalposes.at(contgoals).v = 0.1;
+	
+	startpose.v = 0.1;
 
 	executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	

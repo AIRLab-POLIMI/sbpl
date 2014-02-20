@@ -1490,7 +1490,7 @@ int EnvironmentNAVXYTHETAV::GetFromToHeuristic(int FromStateID, int ToStateID)
 
 	//TODO - check if one of the gridsearches already computed and then use it.
 
-	return (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->x, FromHashEntry->y, ToHashEntry->x, ToHashEntry->y)/NAVXYTHETAV_DEFAULTMEDIUMVELOCITY);
+	return (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->x, FromHashEntry->y, ToHashEntry->x, ToHashEntry->y)/(NAVXYTHETAV_DEFAULTMEDIUMVELOCITY+2));
 	//return (int)(NAVXYTHETAV_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->x, FromHashEntry->y, ToHashEntry->x, ToHashEntry->y));
 }
 
@@ -1515,7 +1515,7 @@ int EnvironmentNAVXYTHETAV::GetGoalHeuristic(int stateID)
 																		EnvNAVXYTHETAVCfg.EndY_c));
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
-	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
+	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY+2));
 	//return (int)(((double)__max(h2D, hEuclid)));
 }
 
@@ -1540,7 +1540,7 @@ int EnvironmentNAVXYTHETAV::GetStartHeuristic(int stateID)
 																		HashEntry->y));
 
 	//define this function if it is used in the planner (heuristic backward search would use it)
-	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY));
+	return (int)(((double)__max(h2D, hEuclid)) / (NAVXYTHETAV_DEFAULTMEDIUMVELOCITY+2));
 	//return (int)(((double)__max(h2D, hEuclid)));
 }
 

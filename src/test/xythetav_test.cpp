@@ -448,7 +448,7 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 	double dec_eps = 0.1;
 	MDPConfig MDPCfg;
 	bool bsearchuntilfirstsolution = false;
-	bool bforwardsearch = false;
+	bool bforwardsearch = true;
 
 	// set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
 	vector<sbpl_2Dpt_t> perimeterptsV;

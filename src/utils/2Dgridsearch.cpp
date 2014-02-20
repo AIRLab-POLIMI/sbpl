@@ -226,10 +226,10 @@ void SBPL2DGridSearch::computedxy()
         if (dx_[dind] != 0 && dy_[dind] != 0) {
             if (dind <= 7)
                 //the cost of a diagonal move in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1000);//1414); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1414);//1414); 
             else
                 //the cost of a move to 1,2 or 2,1 or so on in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2000);//2236); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2236);//2236); 
         }
         else
             dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1000); //the cost of a horizontal move in millimeters
@@ -253,7 +253,7 @@ bool SBPL2DGridSearch::search(unsigned char** Grid2D, unsigned char obsthresh, i
                               int goaly_c, SBPL_2DGRIDSEARCH_TERM_CONDITION termination_condition)
 {
 
-    switch (OPENtype_) {
+	switch (OPENtype_) {
     case SBPL_2DGRIDSEARCH_OPENTYPE_HEAP:
         return SBPL2DGridSearch::search_withheap(Grid2D, obsthresh, startx_c, starty_c, goalx_c, goaly_c,
                                                  termination_condition);

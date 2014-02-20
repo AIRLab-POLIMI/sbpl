@@ -476,20 +476,20 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     // set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
     vector<sbpl_2Dpt_t> perimeterptsV;
     sbpl_2Dpt_t pt_m;
-    double halfwidth = 0.01; //0.3;
-    double halflength = 0.01; //0.45;
-    pt_m.x = -halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = -halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
+    double halfwidth = 1.0; //0.3;
+	double halflength = 1.0; //0.45;
+	pt_m.x = -halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = -halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
 
     // clear the footprint
     perimeterptsV.clear();
