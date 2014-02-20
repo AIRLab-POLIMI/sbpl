@@ -548,6 +548,53 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     // plan
     printf("start planning...\n");
     bRet = planner->replan(allocated_time_secs, &solution_stateIDs_V);
+	
+	/* Step by step solution
+	int sc = 0;
+	bool ne = false;
+	bool flag = true;
+	while(planner->get_solution_eps() > 1 && !ne){
+		bRet = ((ADPlanner*)planner)->single_plan(allocated_time_secs, &solution_stateIDs_V, &sc);
+		
+		if(bRet){
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+			printf("solution cost = %d\n", sc);
+			printf("solution eps = %f\n", planner->get_solution_eps());
+#endif
+			vector<sbpl_xy_theta_pt_t> xythetavPath;
+			environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetavPath);
+#if XYTHETAVTEST_PERFORMANCE_TEST == 0
+			printf("solution size=%d\n", (unsigned int)xythetavPath.size());
+#endif
+		}
+		else{
+			ne = true;
+		}
+		
+// 		if(fabs(planner->get_solution_eps()-1.5) <= 0.001 && flag){
+// 			int newx, newy, newtheta, newv;
+// 			environment_navxythetav.GetCoordFromState(solution_stateIDs_V[49], newx, newy, newtheta, newv);
+// 			vector<double> velocities;
+// 			velocities.push_back(-9.0);
+// 			velocities.push_back(-3.0);
+// 			velocities.push_back(-1.5);
+// 			velocities.push_back(-0.0);
+// 			velocities.push_back(1.5);
+// 			velocities.push_back(3.0);
+// 			velocities.push_back(9.0);
+// 			
+// 			double startx = DISCXY2CONT(newx, 1);
+// 			double starty = DISCXY2CONT(newy, 1);
+// 			double starttheta = DiscTheta2Cont(newtheta, 16);
+// 			double startv = DiscV2Cont(newv, velocities);
+// 			
+// 			planner->set_initialsolution_eps(planner->get_solution_eps()-dec_eps);
+// 			int id = environment_navxythetav.SetStart(startx, starty, starttheta, startv);
+// 			planner->set_start(id);
+// 			flag = false;
+// 		}
+	}*/
+	
     printf("done planning\n");
     printf("size of solution=%d\n", (unsigned int)solution_stateIDs_V.size());
 

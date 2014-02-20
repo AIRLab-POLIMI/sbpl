@@ -2180,7 +2180,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 #endif
 
 	xythetavPath->clear();
-	//double sumcost = 0;
+	//int sumcost = 0;
 	
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "converting stateid path into coordinates:\n");
@@ -2259,7 +2259,7 @@ void EnvironmentNAVXYTHETAV::ConvertStateIDPathintoXYThetaVPath(vector<int>* sta
 			xythetavPath->push_back(intermpt);
 		}
 	}
-	//printf("\n\n\n%f\n\n\n", sumcost);
+	//printf("\n\n\n%d\n\n\n", sumcost);
 }
 
 /* Useful functions */
@@ -2294,6 +2294,7 @@ int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTh
 
 	//need to iterate over discretized center cells and compute cost based on them
 	double maxcellcost = 0;
+	double cellcost = 1;
 	for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
 		interm4Dcell = action->interm3DcellsV.at(i);
 		interm4Dcell.x = interm4Dcell.x + sourceX;
@@ -2303,6 +2304,9 @@ int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTh
 			|| interm4Dcell.y >= EnvNAVXYTHETAVCfg.EnvHeight_c) return INFINITECOST;
 
 		maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y]);
+		cellcost*=(1+EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y]);
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
 
 		//check that the robot is NOT in the cell at which there is no valid orientation
 		if (maxcellcost >= (double)(EnvNAVXYTHETAVCfg.cost_inscribed_thresh)) return INFINITECOST;
@@ -2340,7 +2344,10 @@ int EnvironmentNAVXYTHETAV::GetActionCost(int sourceX, int sourceY, int sourceTh
 		return INFINITECOST;
 	
 	return (int)((double)(action->cost) * (exp(currentmaxcost)));*/
-	return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
+	//return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
+	return (int)((double)(action->cost) * (cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost/action->interm3DcellsV.size()));
 }
 
 void EnvironmentNAVXYTHETAV::SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,

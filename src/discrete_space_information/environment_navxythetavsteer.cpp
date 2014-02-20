@@ -2403,6 +2403,7 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 
 	//need to iterate over discretized center cells and compute cost based on them
 	double maxcellcost = 0;
+	double cellcost = 1;
 	for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
 		interm5Dcell = action->interm3DcellsV.at(i);
 		interm5Dcell.x = interm5Dcell.x + sourceX;
@@ -2412,6 +2413,9 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 			|| interm5Dcell.y >= EnvNAVXYTHETAVSTEERCfg.EnvHeight_c) return INFINITECOST;
 
 		maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[interm5Dcell.x][interm5Dcell.y]);
+		cellcost*=(1+EnvNAVXYTHETAVSTEERCfg.Grid2D[interm5Dcell.x][interm5Dcell.y]);
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
 
 		//check that the robot is NOT in the cell at which there is no valid orientation
 		if (maxcellcost >= (double)(EnvNAVXYTHETAVSTEERCfg.cost_inscribed_thresh)) return INFINITECOST;
@@ -2444,8 +2448,15 @@ int EnvironmentNAVXYTHETAVSTEER::GetActionCost(int sourceX, int sourceY, int sou
 	maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[sourceX][sourceY]);
 	double currentmaxcost =
 			(int)__max(maxcellcost, EnvNAVXYTHETAVSTEERCfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
-			
-	return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
+	
+	/*if(currentmaxcost >= 0.6 && (action->startv==0 || action->endv==EnvNAVXYTHETAVCfg.numV-1))
+		return INFINITECOST;
+	
+	return (int)((double)(action->cost) * (exp(currentmaxcost)));*/
+	return (int)((double)(action->cost) * (cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost/action->interm3DcellsV.size()));
+	//return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
 }
 
 void EnvironmentNAVXYTHETAVSTEER::SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,

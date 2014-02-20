@@ -1285,6 +1285,7 @@ int EnvironmentNAVXYTHETALATTICE::GetActionCost(int SourceX, int SourceY, int So
 
     //need to iterate over discretized center cells and compute cost based on them
     double maxcellcost = 0;
+	double cellcost = 1;
     for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
         interm3Dcell = action->interm3DcellsV.at(i);
         interm3Dcell.x = interm3Dcell.x + SourceX;
@@ -1294,6 +1295,9 @@ int EnvironmentNAVXYTHETALATTICE::GetActionCost(int SourceX, int SourceY, int So
             || interm3Dcell.y >= EnvNAVXYTHETALATCfg.EnvHeight_c) return INFINITECOST;
 
         maxcellcost = __max(maxcellcost, EnvNAVXYTHETALATCfg.Grid2D[interm3Dcell.x][interm3Dcell.y]);
+		cellcost*=(1+EnvNAVXYTHETALATCfg.Grid2D[interm3Dcell.x][interm3Dcell.y]);
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
+		//cellcost+=EnvNAVXYTHETAVCfg.Grid2D[interm4Dcell.x][interm4Dcell.y];
 
         //check that the robot is NOT in the cell at which there is no valid orientation
         if (maxcellcost >= (double)(EnvNAVXYTHETALATCfg.cost_inscribed_thresh)) return INFINITECOST;
@@ -1327,7 +1331,14 @@ int EnvironmentNAVXYTHETALATTICE::GetActionCost(int SourceX, int SourceY, int So
     double currentmaxcost =
             __max(maxcellcost, EnvNAVXYTHETALATCfg.Grid2D[SourceX + action->dX][SourceY + action->dY]);
 
-    return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
+	/*if(currentmaxcost >= 0.6 && (action->startv==0 || action->endv==EnvNAVXYTHETAVCfg.numV-1))
+		return INFINITECOST;
+	
+	return (int)((double)(action->cost) * (exp(currentmaxcost)));*/
+	//return (int)((double)(action->cost) * (currentmaxcost + 1.0)); //use cell cost as multiplicative factor
+	return (int)((double)(action->cost) * (cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost));
+	//return (int)((double)(action->cost) * (1+cellcost/action->interm3DcellsV.size()));
 }
 
 double EnvironmentNAVXYTHETALATTICE::EuclideanDistance_m(int X1, int Y1, int X2, int Y2)
@@ -2051,7 +2062,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
     SBPL_FPRINTF(fDeb, "converting stateid path into coordinates:\n");
 #endif
-
+	//int sumcost=0;
     for (int pind = 0; pind < (int)(stateIDPath->size()) - 1; pind++) {
         int sourceID = stateIDPath->at(pind);
         int targetID = stateIDPath->at(pind + 1);
@@ -2103,7 +2114,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
         double sourcex, sourcey;
         sourcex = DISCXY2CONT(sourcex_c, EnvNAVXYTHETALATCfg.cellsize_m);
         sourcey = DISCXY2CONT(sourcey_c, EnvNAVXYTHETALATCfg.cellsize_m);
-		
+		//sumcost+=bestcost;
         //TODO - when there are no motion primitives we should still print source state
         for (int ipind = 0; ipind < ((int)actionV[bestsind]->intermptV.size()) - 1; ipind++) {
             //translate appropriately
@@ -2126,6 +2137,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
             xythetaPath->push_back(intermpt);
         }
     }
+    //printf("\n\n\n%d\n\n\n", sumcost);
 }
 
 //returns the stateid if success, and -1 otherwise
