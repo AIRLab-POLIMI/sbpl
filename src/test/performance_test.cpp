@@ -597,7 +597,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	velocities.push_back(-9.0);
 	velocities.push_back(-3.0);
 	velocities.push_back(-1.5);
-	velocities.push_back(0.1);
+	velocities.push_back(0);
 	velocities.push_back(1.5);
 	velocities.push_back(3.0);
 	velocities.push_back(9.0);
@@ -701,6 +701,14 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//AD* and xytv_safe
+	velocities.clear();
+	velocities.push_back(-9.0);
+        velocities.push_back(-3.0);
+        velocities.push_back(-1.5);
+        velocities.push_back(0.1);
+        velocities.push_back(1.5);
+        velocities.push_back(3.0);
+        velocities.push_back(9.0);
 	executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	delete [] map;
