@@ -49,6 +49,7 @@
 #include <sbpl/discrete_space_information/environment_navxythetalat.h>
 #include <sbpl/discrete_space_information/environment_navxythetav.h>
 #include <sbpl/discrete_space_information/environment_navxythetavsteer.h>
+#include <sbpl/discrete_space_information/environment_navxythetavomega.h>
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
 #include <sbpl/discrete_space_information/environment_XXX.h>

@@ -444,8 +444,8 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 {
 	int bRet = 0;
 	double allocated_time_secs = 1200.0; // in seconds
-	double initialEpsilon = 3.0;
-	double dec_eps = 0.1;
+	double initialEpsilon = 50.0;
+	double dec_eps = 10;
 	MDPConfig MDPCfg;
 	bool bsearchuntilfirstsolution = false;
 	bool bforwardsearch = true;

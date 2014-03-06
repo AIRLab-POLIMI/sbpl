@@ -474,9 +474,9 @@ void EnvironmentNAVXYTHETAVOMEGA::ReadConfiguration(FILE* fCfg)
 	}
 
 	//allocate the 2D environment
-	EnvNAVXYTHETAVOMEGACfg.Grid2D = new unsigned char*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
+	EnvNAVXYTHETAVOMEGACfg.Grid2D = new double*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
 	for (x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
-		EnvNAVXYTHETAVOMEGACfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
+		EnvNAVXYTHETAVOMEGACfg.Grid2D[x] = new double[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
 	}
 
 	//environment:
@@ -485,13 +485,14 @@ void EnvironmentNAVXYTHETAVOMEGA::ReadConfiguration(FILE* fCfg)
 		throw new SBPL_Exception();
 	}
 	
+	double fTemp;
 	for (y = EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1; y >= 0; y--)
 		for (x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
-			if (fscanf(fCfg, "%d", &dTemp) != 1) {
+			if (fscanf(fCfg, "%lf", &fTemp) != 1) {
 				SBPL_ERROR("ERROR: incorrect format of config file\n");
 				throw new SBPL_Exception();
 			}
-			EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y] = dTemp;
+			EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y] = fTemp;
 		}
 	
 	if(!IsValidConfiguration(EnvNAVXYTHETAVOMEGACfg.StartX_c, EnvNAVXYTHETAVOMEGACfg.StartY_c, EnvNAVXYTHETAVOMEGACfg.StartTheta, EnvNAVXYTHETAVOMEGACfg.StartV, EnvNAVXYTHETAVOMEGACfg.StartOmega)){
@@ -1357,7 +1358,20 @@ bool EnvironmentNAVXYTHETAVOMEGA::ReadSinglePose(sbpl_xy_theta_v_omega_pt_t* pos
 
 void EnvironmentNAVXYTHETAVOMEGA::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 	if (bNeedtoRecomputeStartHeuristics && !bGoalHeuristics) {
-		grid2Dsearchfromstart->search(EnvNAVXYTHETAVOMEGACfg.Grid2D, EnvNAVXYTHETAVOMEGACfg.cost_inscribed_thresh,
+		//Create temporary map
+		unsigned char ** map;
+	
+		map = new unsigned char*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
+		for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
+			map[x] = new unsigned char[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
+		}
+		
+		for (int y = EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1; y >= 0; y--)
+			for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
+				map[x][y] = (int)(EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
+			}
+		
+		grid2Dsearchfromstart->search(map, EnvNAVXYTHETAVOMEGACfg.cost_inscribed_thresh,
 									EnvNAVXYTHETAVOMEGACfg.StartX_c, EnvNAVXYTHETAVOMEGACfg.StartY_c,
 									EnvNAVXYTHETAVOMEGACfg.EndX_c, EnvNAVXYTHETAVOMEGACfg.EndY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
@@ -1370,10 +1384,28 @@ void EnvironmentNAVXYTHETAVOMEGA::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.EndX_c,
 																				EnvNAVXYTHETAVCfg.EndY_c)));*/
+		
+		//Destroy temporary map
+		for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++)
+			delete[] map[x];
+		delete[] map;
 	}
 
 	if (bNeedtoRecomputeGoalHeuristics && bGoalHeuristics) {
-		grid2Dsearchfromgoal->search(EnvNAVXYTHETAVOMEGACfg.Grid2D, EnvNAVXYTHETAVOMEGACfg.cost_inscribed_thresh,
+		//Create temporary map
+		unsigned char ** map;
+	
+		map = new unsigned char*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
+		for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
+			map[x] = new unsigned char[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
+		}
+		
+		for (int y = EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1; y >= 0; y--)
+			for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
+				map[x][y] = (int)(EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
+			}
+			
+		grid2Dsearchfromgoal->search(map, EnvNAVXYTHETAVOMEGACfg.cost_inscribed_thresh,
 									EnvNAVXYTHETAVOMEGACfg.EndX_c, EnvNAVXYTHETAVOMEGACfg.EndY_c,
 									EnvNAVXYTHETAVOMEGACfg.StartX_c, EnvNAVXYTHETAVOMEGACfg.StartY_c,
 									SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
@@ -1387,6 +1419,11 @@ void EnvironmentNAVXYTHETAVOMEGA::EnsureHeuristicsUpdated(bool bGoalHeuristics){
 		/*SBPL_PRINTF("2dsolcost_infullunits=%d\n",
 					(int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETAVCfg.StartX_c,
 																				EnvNAVXYTHETAVCfg.StartY_c)));*/
+		
+		//Destroy temporary map
+		for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++)
+			delete[] map[x];
+		delete[] map;
 	}
 }
 
@@ -1878,7 +1915,7 @@ void EnvironmentNAVXYTHETAVOMEGA::PrintEnv_Config(FILE* fOut)
 		
 		for (int y = EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
-				fprintf(fOut, "%d ", EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
+				fprintf(fOut, "%lf ", EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
 			}
 			
 			fprintf(fOut, "\n");
@@ -1907,7 +1944,7 @@ void EnvironmentNAVXYTHETAVOMEGA::PrintEnv_Config(FILE* fOut)
 		
 		for (int y = EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1; y >= 0; y--){
 			for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
-				printf("%d ", EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
+				printf("%lf ", EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y]);
 			}
 			
 			printf("\n");
@@ -1917,7 +1954,7 @@ void EnvironmentNAVXYTHETAVOMEGA::PrintEnv_Config(FILE* fOut)
 }
 
 bool EnvironmentNAVXYTHETAVOMEGA::InitializeEnv(int width, int height, int numthetadirs, int numv, int numomega, vector<double> velocities, vector<double> omegas,
-							const unsigned char* mapdata,
+							const double* mapdata,
 							double startx, double starty, double starttheta, double startv, double startomega,
 							double goalx, double goaly, double goaltheta, double goalv, double goalomega,
 							const vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
@@ -1987,7 +2024,7 @@ bool EnvironmentNAVXYTHETAVOMEGA::InitializeEnv(int width, int height, int numth
 	return true;
 }
 
-bool EnvironmentNAVXYTHETAVOMEGA::UpdateCost(int x, int y, unsigned char newcost){
+bool EnvironmentNAVXYTHETAVOMEGA::UpdateCost(int x, int y, double newcost){
 	EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y] = newcost;
 
 	bNeedtoRecomputeStartHeuristics = true;
@@ -1996,7 +2033,7 @@ bool EnvironmentNAVXYTHETAVOMEGA::UpdateCost(int x, int y, unsigned char newcost
 	return true;
 }
 
-bool EnvironmentNAVXYTHETAVOMEGA::SetMap(const unsigned char* mapdata){
+bool EnvironmentNAVXYTHETAVOMEGA::SetMap(const double * mapdata){
 	for (int xind = 0; xind < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; xind++) {
 		for (int yind = 0; yind < EnvNAVXYTHETAVOMEGACfg.EnvHeight_c; yind++) {
 			EnvNAVXYTHETAVOMEGACfg.Grid2D[xind][EnvNAVXYTHETAVOMEGACfg.EnvHeight_c-1-yind] = mapdata[xind + yind * EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
@@ -2160,7 +2197,7 @@ void EnvironmentNAVXYTHETAVOMEGA::PrintTimeStat(FILE* fOut){
 	/*TO BE IMPLEMENTED*/
 }
 
-unsigned char EnvironmentNAVXYTHETAVOMEGA::GetMapCost(int x, int y){
+double EnvironmentNAVXYTHETAVOMEGA::GetMapCost(int x, int y){
 	return EnvNAVXYTHETAVOMEGACfg.Grid2D[x][y];
 }
 
@@ -2417,7 +2454,7 @@ int EnvironmentNAVXYTHETAVOMEGA::GetActionCost(int sourceX, int sourceY, int sou
 	}
 
 	//need to iterate over discretized center cells and compute cost based on them
-	unsigned char maxcellcost = 0;
+	double maxcellcost = 0;
 	for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
 		interm5Dcell = action->interm3DcellsV.at(i);
 		interm5Dcell.x = interm5Dcell.x + sourceX;
@@ -2463,7 +2500,7 @@ int EnvironmentNAVXYTHETAVOMEGA::GetActionCost(int sourceX, int sourceY, int sou
 	return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
 }
 
-void EnvironmentNAVXYTHETAVOMEGA::SetConfiguration(int width, int height, const unsigned char * mapdata, int startx, int starty,
+void EnvironmentNAVXYTHETAVOMEGA::SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,
 								int starttheta, int startv, int startomega, int goalx, int goaly, int goaltheta, int goalv, int goalomega,
 							double cellsize_m, const vector<sbpl_2Dpt_t>& perimeterptsV){
 	EnvNAVXYTHETAVOMEGACfg.EnvWidth_c = width;
@@ -2519,9 +2556,9 @@ void EnvironmentNAVXYTHETAVOMEGA::SetConfiguration(int width, int height, const 
 	EnvNAVXYTHETAVOMEGACfg.cellsize_m = cellsize_m;
 	
 	//allocate the 2D environment
-	EnvNAVXYTHETAVOMEGACfg.Grid2D = new unsigned char*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
+	EnvNAVXYTHETAVOMEGACfg.Grid2D = new double*[EnvNAVXYTHETAVOMEGACfg.EnvWidth_c];
 	for (int x = 0; x < EnvNAVXYTHETAVOMEGACfg.EnvWidth_c; x++) {
-		EnvNAVXYTHETAVOMEGACfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
+		EnvNAVXYTHETAVOMEGACfg.Grid2D[x] = new double[EnvNAVXYTHETAVOMEGACfg.EnvHeight_c];
 	}
 
 	//environment:
