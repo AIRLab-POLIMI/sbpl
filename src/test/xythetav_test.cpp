@@ -444,11 +444,11 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 {
 	int bRet = 0;
 	double allocated_time_secs = 1200.0; // in seconds
-	double initialEpsilon = 50.0;
-	double dec_eps = 10;
+	double initialEpsilon = 64.0;
+	double dec_eps = initialEpsilon/2.0;
 	MDPConfig MDPCfg;
 	bool bsearchuntilfirstsolution = false;
-	bool bforwardsearch = true;
+	bool bforwardsearch = false;
 
 	// set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
 	vector<sbpl_2Dpt_t> perimeterptsV;
@@ -550,6 +550,8 @@ int planmanualxythetav(PlannerType plannerType, char* envCfgFilename, char* motP
 				fprintf(fSolC, "%.3f %.3f %.3f %.3f\n", xythetavPath.at(i).x, xythetavPath.at(i).y, xythetavPath.at(i).theta, xythetavPath.at(i).v);
 			}
 			fclose(fSolC);
+			
+			((ADPlanner*)planner)->set_dec_eps(planner->get_solution_eps()/2.0);
 		}
 		else{
 			ne = true;

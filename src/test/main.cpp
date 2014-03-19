@@ -468,7 +468,7 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 {
     int bRet = 0;
     double allocated_time_secs = 1200.0; // in seconds
-    double initialEpsilon = 3.0;
+    double initialEpsilon = 15.0;
     MDPConfig MDPCfg;
     bool bsearchuntilfirstsolution = false;
     bool bforwardsearch = forwardSearch;
@@ -547,9 +547,9 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 
     // plan
     printf("start planning...\n");
-    bRet = planner->replan(allocated_time_secs, &solution_stateIDs_V);
+    //bRet = planner->replan(allocated_time_secs, &solution_stateIDs_V);
 	
-	/* Step by step solution
+	 //Step by step solution
 	int sc = 0;
 	bool ne = false;
 	bool flag = true;
@@ -593,7 +593,7 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 // 			planner->set_start(id);
 // 			flag = false;
 // 		}
-	}*/
+	}
 	
     printf("done planning\n");
     printf("size of solution=%d\n", (unsigned int)solution_stateIDs_V.size());
