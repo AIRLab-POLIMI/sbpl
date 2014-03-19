@@ -1076,7 +1076,7 @@ bool EnvironmentNAVXYTHETAVSTEER::ReadMotionPrimitives(FILE* fMotPrims){
 	}
 	for(int i=0;i<EnvNAVXYTHETAVSTEERCfg.numV;i++){
 		if (fscanf(fMotPrims, "%f", &fTemp) == 0) return false;
-		if (fTemp != EnvNAVXYTHETAVSTEERCfg.velocities[i]) {
+		if (round(fTemp*1000)/1000 != round(EnvNAVXYTHETAVSTEERCfg.velocities[i]*1000)/1000) {
 			SBPL_ERROR("ERROR: invalid velocity value %f velocity (instead of %f velocity) in the motion primitives file\n",
 					fTemp, EnvNAVXYTHETAVSTEERCfg.velocities[i]);
 			return false;
