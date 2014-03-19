@@ -1850,7 +1850,7 @@ bool EnvironmentNAVXYTHETAV::InitializeEnv(int width, int height, int numthetadi
 	}
 	
 	//TODO - need to set the tolerance as well
-
+	
 	SetConfiguration(width, height, mapdata, CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m),
 					ContTheta2DiscNotUnif(starttheta, EnvNAVXYTHETAVCfg.NumThetaDirs), ContV2Disc(startv, EnvNAVXYTHETAVCfg.velocities),
 					CONTXY2DISC(goalx, cellsize_m), CONTXY2DISC(goaly, cellsize_m), ContTheta2DiscNotUnif(goaltheta, EnvNAVXYTHETAVCfg.NumThetaDirs),

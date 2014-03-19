@@ -658,8 +658,10 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	
 	fclose(occupancyFile);
 
-	for(int contgoals=0;i<goalposes.size();contgoals++)
+	for(contgoals=0;contgoals<goalposes.size();contgoals++)
 		goalposes.at(contgoals).v = 0.0;
+
+	startpose.v = 0.0;
 	
 	//Set parameters for planner
 	double allocated_time_secs_foreachplan = 1500.0; // in seconds
@@ -677,7 +679,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//AD* and xyt
-	executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETA, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xytheta_prim/xytheta_not_unif_min_forward.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytv
 	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
@@ -686,7 +688,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 
 	//AD* and xytv
-	executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAV, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/theta_not_reg_rid_pos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytvp
 	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
@@ -695,7 +697,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ANASTARDOUBLE, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//AD* and xytvp
-	executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
+	//executePlan(ENV_TYPE_XYTHETAVSTEER, PLANNER_TYPE_ADSTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetavsteer_prim/intro_steer_reduced_vpos.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
 	
 	//ARA* and xytv_safe
 	//executePlan(ENV_TYPE_XYTHETAV_SAFE, PLANNER_TYPE_ARASTAR, width, height, map, obsthresh, cost_inscribed_thresh, cost_possibly_circumscribed_thresh, nominalvel, timetoturn, numtheta, numV, numSteers, &velocities, &perimeterptsV, &startpose, &goalposes, "../myprimitives/xythetav_prim/xythetav_safe.txt", cellsize_m, bforwardsearch, bsearchuntilfirstsolution, initialEpsilon, allocated_time_secs_foreachplan);
@@ -713,7 +715,7 @@ int planTest(char * occupancyFileName, char * startFileName, char * goalsFileNam
 	velocities.push_back(3.0);
 	velocities.push_back(9.0);
 
-	for(int contgoals=0;i<goalposes.size();contgoals++)
+	for(int contgoals=0;contgoals<goalposes.size();contgoals++)
                 goalposes.at(contgoals).v = 0.1;
 	
 	startpose.v = 0.1;
