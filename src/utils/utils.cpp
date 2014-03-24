@@ -476,10 +476,17 @@ int ContTheta2DiscNotUnif(double fTheta, int NUMOFANGLEVALS)
 		fTheta -= 2*PI_CONST;
 	
 	int i=0;
+	int minAngularDistIndex = 0;
+	double minAngularDist = fabs(round_two_decimal(all_theta_cont.at(0)) - round_two_decimal(fTheta));
 	
-	for(i=0;i<all_theta_cont.size() && fabs(round_two_decimal(all_theta_cont.at(i)) - round_two_decimal(fTheta))>(PI_CONST*2/(NUMOFANGLEVALS*4));i++);
+	for(i=0;i<all_theta_cont.size();i++){
+		if(fabs(round_two_decimal(all_theta_cont.at(i)) - round_two_decimal(fTheta)) < minAngularDist){
+			minAngularDist = fabs(round_two_decimal(all_theta_cont.at(i)) - round_two_decimal(fTheta));
+			minAngularDistIndex = i;
+		}
+	}
 	
-	return i;
+	return minAngularDistIndex;
 }
 
 int ContV2Disc(double fV, vector<double> velocities){
