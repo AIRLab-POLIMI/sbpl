@@ -371,6 +371,7 @@ void EnvironmentNAVXYTHETAVSTEER::ReadConfiguration(FILE* fCfg)
 		SBPL_ERROR("ERROR: ran out of env file early\n");
 		throw new SBPL_Exception();
 	}
+
 	EnvNAVXYTHETAVSTEERCfg.StartV = ContV2Disc(atof(sTemp), EnvNAVXYTHETAVSTEERCfg.velocities);
 	if (fscanf(fCfg, "%s", sTemp) != 1) {
 		SBPL_ERROR("ERROR: ran out of env file early\n");
