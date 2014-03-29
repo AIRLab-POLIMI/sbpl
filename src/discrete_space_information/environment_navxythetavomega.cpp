@@ -2455,6 +2455,7 @@ int EnvironmentNAVXYTHETAVOMEGA::GetActionCost(int sourceX, int sourceY, int sou
 
 	//need to iterate over discretized center cells and compute cost based on them
 	double maxcellcost = 0;
+	double cellcost = 1;
 	for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
 		interm5Dcell = action->interm3DcellsV.at(i);
 		interm5Dcell.x = interm5Dcell.x + sourceX;
@@ -2464,6 +2465,7 @@ int EnvironmentNAVXYTHETAVOMEGA::GetActionCost(int sourceX, int sourceY, int sou
 			|| interm5Dcell.y >= EnvNAVXYTHETAVOMEGACfg.EnvHeight_c) return INFINITECOST;
 
 		maxcellcost = __max(maxcellcost, EnvNAVXYTHETAVOMEGACfg.Grid2D[interm5Dcell.x][interm5Dcell.y]);
+		cellcost*=(1+EnvNAVXYTHETAVOMEGACfg.Grid2D[interm5Dcell.x][interm5Dcell.y]);
 
 		//check that the robot is NOT in the cell at which there is no valid orientation
 		if (maxcellcost >= EnvNAVXYTHETAVOMEGACfg.cost_inscribed_thresh) return INFINITECOST;
@@ -2497,7 +2499,8 @@ int EnvironmentNAVXYTHETAVOMEGA::GetActionCost(int sourceX, int sourceY, int sou
 	int currentmaxcost =
 			(int)__max(maxcellcost, EnvNAVXYTHETAVOMEGACfg.Grid2D[sourceX + action->dX][sourceY + action->dY]);
 			
-	return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
+	//return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
+	return (int)((double)(action->cost) * (cellcost));
 }
 
 void EnvironmentNAVXYTHETAVOMEGA::SetConfiguration(int width, int height, const double * mapdata, int startx, int starty,

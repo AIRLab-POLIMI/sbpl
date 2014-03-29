@@ -55,3 +55,6 @@ target_link_libraries(xythetavsteer_test sbpl)
 
 add_executable(performance_test src/test/performance_test.cpp)
 target_link_libraries(performance_test sbpl)
+
+add_executable(xythetavomega_test src/test/xythetavomega_test.cpp)
+target_link_libraries(xythetavomega_test sbpl)

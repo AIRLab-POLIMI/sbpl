@@ -6,7 +6,9 @@ cmake ..
 make
 sudo make install
 
-Now the library is installed. To test it there are some environment configuration files in env_examples and in myenvfiles directories and there are some motion primitives files in matlab/mprim and in myprimitives directories.
+Now the library is installed. To test it there are some environment configuration files in env_examples and in myenvfiles directories
+(in both are subdivided for environment type and in the second folder also for number of orientation discretization)and there are
+some motion primitives files in matlab/mprim and in myprimitives directories (in the second folder are subdivided by type).
 
 Depending on which executable is launched there are different parameters to specify, but launching them with -h parameters an help appear.
 Do not launch performance_test executable, it is only to do various sequential tests on planners and environments.
