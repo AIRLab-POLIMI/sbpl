@@ -232,303 +232,69 @@ int saveSolution(DiscreteSpaceInformation * environment, EnvironmentType envType
 }
 
 int moveFiles(EnvironmentType envType, PlannerType planType, int i, int bret){
-	stringstream destPerfPath, destSolPath;
+	stringstream destPerfPath, destSolPath, fileToRename;
+	
+	destPerfPath << "./Performance/";
+	destSolPath << "./Performance/";
 	
 	if(planType == PLANNER_TYPE_ARASTAR){
-		if(envType == ENV_TYPE_XYTHETA){
-			if(i<10){
-				destPerfPath << "./Performance/arastar/xytheta/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xytheta/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/arastar/xytheta/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xytheta/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/arastar/xytheta/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xytheta/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/arastar/xytheta/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xytheta/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV){
-			if(i<10){
-				destPerfPath << "./Performance/arastar/xythetav/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/arastar/xythetav/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/arastar/xythetav/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/arastar/xythetav/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/arastar/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/arastar/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/arastar/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/arastar/xythetav_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetav_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER){
-			if(i<10){
-				destPerfPath << "./Performance/arastar/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/arastar/xythetavsteer/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/arastar/xythetavsteer/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/arastar/xythetavsteer/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/arastar/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/arastar/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/arastar/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/arastar/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/arastar/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else{
-			return -1;
-		}
-		
-		rename("arastarperf.txt", destPerfPath.str().c_str());
-	}
-	else if(planType == PLANNER_TYPE_ANASTARDOUBLE){
-		if(envType == ENV_TYPE_XYTHETA){
-			if(i<10){
-				destPerfPath << "./Performance/anastardouble/xytheta/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xytheta/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/anastardouble/xytheta/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xytheta/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/anastardouble/xytheta/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xytheta/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/anastardouble/xytheta/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xytheta/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV){
-			if(i<10){
-				destPerfPath << "./Performance/anastardouble/xythetav/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/anastardouble/xythetav/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/anastardouble/xythetav/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/anastardouble/xythetav/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/anastardouble/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/anastardouble/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/anastardouble/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/anastardouble/xythetav_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetav_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER){
-			if(i<10){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/anastardouble/xythetavsteer/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/anastardouble/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/anastardouble/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else{
-			return -1;
-		}
-		
-		rename("anastardoubleperf.txt", destPerfPath.str().c_str());
+		destPerfPath << "arastar/";
+		destSolPath << "arastar/";
+		fileToRename << "arastarperf.txt";
 	}
 	else if(planType == PLANNER_TYPE_ADSTAR){
-		if(envType == ENV_TYPE_XYTHETA){
-			if(i<10){
-				destPerfPath << "./Performance/adstar/xytheta/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xytheta/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/adstar/xytheta/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xytheta/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/adstar/xytheta/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xytheta/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/adstar/xytheta/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xytheta/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV){
-			if(i<10){
-				destPerfPath << "./Performance/adstar/xythetav/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/adstar/xythetav/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/adstar/xythetav/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/adstar/xythetav/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAV_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/adstar/xythetav_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/adstar/xythetav_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/adstar/xythetav_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/adstar/xythetav_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetav_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER){
-			if(i<10){
-				destPerfPath << "./Performance/adstar/xythetavsteer/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/adstar/xythetavsteer/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/adstar/xythetavsteer/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/adstar/xythetavsteer/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
-			if(i<10){
-				destPerfPath << "./Performance/adstar/xythetavsteer_safe/000" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer_safe/000" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<100){
-				destPerfPath << "./Performance/adstar/xythetavsteer_safe/00" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer_safe/00" << i << "_Sol" << bret << ".txt";
-			}
-			else if(i<1000){
-				destPerfPath << "./Performance/adstar/xythetavsteer_safe/0" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer_safe/0" << i << "_Sol" << bret << ".txt";
-			}
-			else{
-				destPerfPath << "./Performance/adstar/xythetavsteer_safe/" << i << "_Perf" << bret << ".txt";
-				destSolPath << "./Performance/adstar/xythetavsteer_safe/" << i << "_Sol" << bret << ".txt";
-			}
-		}
-		else{
-			return -1;
-		}
-		
-		rename("adstarperf.txt", destPerfPath.str().c_str());
+		destPerfPath << "adstar/";
+		destSolPath << "adstar/";
+		fileToRename << "adstarperf.txt";
 	}
-	else{
+	else if(planType == PLANNER_TYPE_ANASTARDOUBLE){
+		destPerfPath << "anastardouble/";
+		destSolPath << "anastardouble/";
+		fileToRename << "anastardoubleperf.txt";
+	}
+	else
 		return -1;
+	
+	if(envType == ENV_TYPE_XYTHETA){
+		destPerfPath << "xytheta/";
+		destSolPath << "xytheta/";
+	}
+	else if(envType == ENV_TYPE_XYTHETAV){
+		destPerfPath << "xythetav/";
+		destSolPath << "xythetav/";
+	}
+	else if(envType == ENV_TYPE_XYTHETAV_SAFE){
+		destPerfPath << "xythetav_safe/";
+		destSolPath << "xythetav_safe/";
+	}
+	else if(envType == ENV_TYPE_XYTHETAVSTEER){
+		destPerfPath << "xythetavsteer/";
+		destSolPath << "xythetavsteer/";
+	}
+	else if(envType == ENV_TYPE_XYTHETAVSTEER_SAFE){
+		destPerfPath << "xythetavsteer_safe/";
+		destSolPath << "xythetavsteer_safe/";
+	}
+	else
+		return -1;
+	
+	if(i < 10){
+		destPerfPath << "000";
+		destSolPath << "000";
+	}
+	else if(i<100){
+		destPerfPath << "00";
+		destSolPath << "00";
+	}
+	else if(i<1000){
+		destPerfPath << "0";
+		destSolPath << "0";
 	}
 	
+	destPerfPath << i << "_Perf" << bret << ".txt";
+	destSolPath << i << "_Sol" << bret << ".txt";
+	
+	rename(fileToRename.str().c_str(), destPerfPath.str().c_str());
 	rename("solContinuous.txt", destSolPath.str().c_str());
 	
 	return 0;
