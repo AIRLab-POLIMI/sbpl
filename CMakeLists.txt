@@ -41,20 +41,20 @@ install(DIRECTORY src/include/sbpl DESTINATION include
 install(TARGETS sbpl
 	LIBRARY DESTINATION lib)
 
-add_executable(test_sbpl src/test/main.cpp)
-target_link_libraries(test_sbpl sbpl)
+#add_executable(test_sbpl src/test/main.cpp)
+#target_link_libraries(test_sbpl sbpl)
 
-add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
-target_link_libraries(test_adjacency_list sbpl)
+#add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
+#target_link_libraries(test_adjacency_list sbpl)
 
-add_executable(xythetav_test src/test/xythetav_test.cpp)
-target_link_libraries(xythetav_test sbpl)
+#add_executable(xythetav_test src/test/xythetav_test.cpp)
+#target_link_libraries(xythetav_test sbpl)
 
-add_executable(xythetavsteer_test src/test/xythetavsteer_test.cpp)
-target_link_libraries(xythetavsteer_test sbpl)
+#add_executable(xythetavsteer_test src/test/xythetavsteer_test.cpp)
+#target_link_libraries(xythetavsteer_test sbpl)
 
-add_executable(performance_test src/test/performance_test.cpp)
-target_link_libraries(performance_test sbpl)
+#add_executable(performance_test src/test/performance_test.cpp)
+#target_link_libraries(performance_test sbpl)
 
-add_executable(xythetavomega_test src/test/xythetavomega_test.cpp)
-target_link_libraries(xythetavomega_test sbpl)
+#add_executable(xythetavomega_test src/test/xythetavomega_test.cpp)
+#target_link_libraries(xythetavomega_test sbpl)
